@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const DisciplinaryWarning = require('../../models/DisciplinaryWarning');
 const LspdCadastro = require('../../models/LspdCadastro');
+const Member = require('../../models/Member');
 const GuildConfig = require('../../models/GuildConfig');
 const { requireAdmin } = require('../middlewares/auth');
 const { discordAPIRequest } = require('../utils/discord');
@@ -46,6 +47,14 @@ router.get('/warnings', async (req, res) => {
         const officersMap = {};
         officers.forEach(o => {
             officersMap[o.userId] = o.nomeSobrenome || o.username;
+        });
+
+        // Buscar na coleção Member para cobrir oficiais sem cadastro completo no RP
+        const members = await Member.find({ discordUserId: { $in: userIds } }).lean();
+        members.forEach(m => {
+            if (!officersMap[m.discordUserId]) {
+                officersMap[m.discordUserId] = m.username;
+            }
         });
 
         // Buscar corregedoria cases caso haja caseId
