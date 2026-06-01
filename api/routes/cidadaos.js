@@ -4,6 +4,28 @@ const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const LspdCadastro = require('../../models/LspdCadastro');
 const LspdCandidatura = require('../../models/LspdCandidatura');
+const mongoose = require('mongoose');
+
+// Definir ou recuperar o model Corporation
+const Corporation = mongoose.models.Corporation || mongoose.model('Corporation', new mongoose.Schema({
+    guildId: { type: String, required: true },
+    slug: { type: String, required: true },
+    name: { type: String, required: true },
+    shortName: { type: String, required: true },
+    type: { type: String, required: true },
+    roles: {
+        geral: { type: String, default: null }
+    },
+    subdivisions: [
+        {
+            slug: { type: String },
+            name: { type: String },
+            shortName: { type: String },
+            roleId: { type: String }
+        }
+    ]
+}, { strict: false }));
+
 const { requireAdmin } = require('../middlewares/auth');
 const { registrarAuditLog, panelOnlyActionDisabled } = require('../utils/helpers');
 const { discordAPIRequest, getActiveGuildConfig } = require('../utils/discord');
@@ -12,91 +34,138 @@ const { discordAPIRequest, getActiveGuildConfig } = require('../utils/discord');
 router.get('/cidadaos', async (req, res) => {
     try {
         const { q } = req.query;
-        let query = {};
-        if (q) {
-            query = {
-                $or: [
-                    { nomeSobrenome: { $regex: q, $options: 'i' } },
-                    { idCidade: { $regex: q, $options: 'i' } },
-                    { username: { $regex: q, $options: 'i' } }
-                ]
-            };
-        }
+        const guildId = process.env.GUILD_ID;
 
-        // 1. Buscar cadastros locais no banco
-        const dbCidadaos = await LspdCadastro.find(query).sort({ createdAt: -1 }).lean();
-
-        // 2. Buscar membros do Discord em tempo real
+        // 1. Buscar membros do Discord em tempo real
         let discordMembers = [];
         try {
-            const guildId = process.env.GUILD_ID;
             if (guildId) {
                 // Busca até 1000 membros do servidor
                 const members = await discordAPIRequest(`/guilds/${guildId}/members?limit=1000`, 'GET');
                 if (Array.isArray(members)) {
-                    // Buscar cargos configurados para LSPD
-                    const config = await getActiveGuildConfig();
-                    
-                    const adminRoleIds = [
-                        config?.roles?.comandoAdmin,
-                        config?.roles?.setupAuthorized,
-                        process.env.ROLE_COMMAND,
-                        process.env.ROLE_SETUP
-                    ].filter(Boolean);
+                    const ROLE_PMESP = '1510829612274548766';
+                    const ROLE_PCESP = '1510829647284273263';
 
-                    const policeRoleIds = [
-                        config?.roles?.policial,
-                        config?.roles?.lspdGeral,
-                        config?.roles?.ticketStaff,
-                        process.env.ROLE_POLICIAL,
-                        process.env.ROLE_LSPD,
-                        process.env.ROLE_TICKET_STAFF
-                    ].filter(Boolean);
-
-                    const allAllowedRoles = [...adminRoleIds, ...policeRoleIds];
-
-                    // Filtra membros (ignora bots)
-                    discordMembers = members
-                        .filter(m => m.user && !m.user.bot)
-                        .filter(m => {
-                            // Se nenhuma role foi configurada ainda, traz todos os membros para facilidade de teste
-                            if (allAllowedRoles.length === 0) return true;
-                            // Se tiver roles configuradas, filtra para trazer apenas oficiais
-                            return (m.roles || []).some(roleId => allAllowedRoles.includes(roleId));
-                        })
-                        .map(m => ({
-                            userId: m.user.id,
-                            nomeSobrenome: m.nick || m.user.global_name || m.user.username,
-                            username: m.user.username,
-                            idCidade: 'Discord' // Tag padrão para membros buscados do Discord
-                        }));
+                    // Filtra membros strictly containing PMESP or PCESP roles
+                    discordMembers = members.filter(m => {
+                        if (!m.user || m.user.bot) return false;
+                        const roles = m.roles || [];
+                        return roles.includes(ROLE_PMESP) || roles.includes(ROLE_PCESP);
+                    });
                 }
             }
         } catch (discordErr) {
             console.error("Erro ao carregar membros do Discord no painel:", discordErr.message);
         }
 
-        // 3. Mesclar resultados por userId (banco de dados tem prioridade se houver cadastro)
-        const mergedMap = new Map();
-        
-        // Adiciona membros do Discord
-        discordMembers.forEach(m => mergedMap.set(m.userId, m));
-        
-        // Sobrescreve/adiciona com cadastros do banco (trazendo informações como idCidade real)
-        dbCidadaos.forEach(c => mergedMap.set(c.userId, c));
+        // Se não houver membros no Discord filtrados, podemos retornar vazio
+        if (discordMembers.length === 0) {
+            return res.json({ success: true, cidadaos: [] });
+        }
 
-        let cidadaos = Array.from(mergedMap.values());
+        // 2. Carregar cadastros, candidaturas e corporações em lote para alta performance
+        const dbCadastros = await LspdCadastro.find({ guildId }).lean();
+        const dbCandidaturas = await LspdCandidatura.find({ guildId }).lean();
+        const dbCorps = await Corporation.find({ guildId }).lean();
 
-        // Se houver busca textual ativa, filtra a lista consolidada
+        // Mapear por userId
+        const cadastroMap = new Map(dbCadastros.map(c => [c.userId, c]));
+        const candidaturaMap = new Map();
+        // Ordenar candidaturas ascendentemente por data para que a mais recente sobrescreva as anteriores
+        dbCandidaturas.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        dbCandidaturas.forEach(cand => {
+            if (cand.idCidade && cand.idCidade !== 'Discord') {
+                candidaturaMap.set(cand.userId, cand.idCidade);
+            }
+        });
+
+        const ROLE_PMESP = '1510829612274548766';
+        const ROLE_PCESP = '1510829647284273263';
+
+        // 3. Montar a lista enriquecida de oficiais
+        let cidadaos = discordMembers.map(m => {
+            const nickname = m.nick || '';
+            const displayName = m.user.global_name || '';
+            const username = m.user.username || '';
+            const userId = m.user.id;
+
+            // Resolução de Passaporte (Citizen ID)
+            const cadastro = cadastroMap.get(userId);
+            let idCidade = 'N/A';
+            if (cadastro && cadastro.idCidade && cadastro.idCidade !== 'Discord') {
+                idCidade = cadastro.idCidade;
+            } else {
+                const candId = candidaturaMap.get(userId);
+                if (candId) {
+                    idCidade = candId;
+                } else if (nickname) {
+                    const match = nickname.match(/\[(\d+)\]/);
+                    if (match) idCidade = match[1];
+                }
+            }
+
+            // Resolução do Nome
+            const nomeSobrenome = (cadastro && cadastro.nomeSobrenome) || nickname || displayName || username || 'Oficial SSP';
+
+            // Resolução de Corporação
+            let corporacao = '';
+            const memberRoles = m.roles || [];
+            if (memberRoles.includes(ROLE_PMESP)) {
+                corporacao = 'PMESP';
+            } else if (memberRoles.includes(ROLE_PCESP)) {
+                corporacao = 'PCESP';
+            }
+
+            // Resolução de Batalhão (subdivisão)
+            let batalhao = '';
+            for (const corp of dbCorps) {
+                if (corp.type === 'tag' && corp.roles?.geral && memberRoles.includes(corp.roles.geral)) {
+                    batalhao = corp.shortName || corp.name;
+                    break;
+                }
+            }
+
+            if (!batalhao) {
+                for (const corp of dbCorps) {
+                    if (corp.type === 'primary' && Array.isArray(corp.subdivisions)) {
+                        for (const sub of corp.subdivisions) {
+                            if (sub.roleId && memberRoles.includes(sub.roleId)) {
+                                batalhao = sub.shortName || sub.name;
+                                break;
+                            }
+                        }
+                    }
+                    if (batalhao) break;
+                }
+            }
+
+            return {
+                userId,
+                nomeSobrenome,
+                username,
+                idCidade,
+                corporacao,
+                batalhao,
+                status: (cadastro && cadastro.status) || 'aprovado',
+                createdAt: (cadastro && cadastro.createdAt) || new Date()
+            };
+        });
+
+        // 4. Filtrar por busca (se houver q)
         if (q) {
             const regex = new RegExp(q, 'i');
             cidadaos = cidadaos.filter(c => 
                 regex.test(c.nomeSobrenome) || 
                 regex.test(c.username) || 
                 regex.test(c.userId) ||
-                regex.test(c.idCidade)
+                regex.test(c.idCidade) ||
+                regex.test(c.corporacao) ||
+                regex.test(c.batalhao)
             );
         }
+
+        // Ordenar alfabeticamente por Nome
+        cidadaos.sort((a, b) => a.nomeSobrenome.localeCompare(b.nomeSobrenome));
 
         res.json({ success: true, cidadaos });
     } catch (error) {
@@ -190,36 +259,167 @@ router.get('/cidadaos/export', async (req, res) => {
 router.get('/cidadaos/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
-        let cidadao = await LspdCadastro.findOne({ userId }).lean();
-        if (!cidadao) {
-            // Tenta buscar no Discord como fallback
-            try {
-                const guildId = process.env.GUILD_ID;
-                if (guildId) {
-                    const member = await discordAPIRequest(`/guilds/${guildId}/members/${userId}`, 'GET');
-                    if (member && member.user) {
-                        cidadao = {
-                            userId: member.user.id,
-                            nomeSobrenome: member.nick || member.user.global_name || member.user.username,
-                            username: member.user.username,
-                            idCidade: 'Discord',
-                            createdAt: new Date(),
-                            status: 'aprovado'
-                        };
-                    }
+        const guildId = process.env.GUILD_ID;
+        
+        let cidadao = null;
+        let member = null;
+        let nick = '';
+        let globalName = '';
+        let username = '';
+        
+        // 1. Buscar membro no Discord
+        try {
+            if (guildId) {
+                member = await discordAPIRequest(`/guilds/${guildId}/members/${userId}`, 'GET');
+                if (member && member.user) {
+                    nick = member.nick || '';
+                    globalName = member.user.global_name || '';
+                    username = member.user.username || '';
                 }
-            } catch (discordErr) {
-                console.error(`[Cidadaos API] Cidadão ${userId} não encontrado no Discord:`, discordErr.message);
             }
+        } catch (discordErr) {
+            console.error(`[Cidadaos API] Membro ${userId} não encontrado no Discord para detalhes:`, discordErr.message);
         }
+
+        // 2. Buscar no banco
+        const cadastro = await LspdCadastro.findOne({ guildId, userId }).lean();
+        const candidaturas = await LspdCandidatura.find({ guildId, userId }).sort({ createdAt: -1 }).lean();
+
+        if (cadastro || (member && member.user)) {
+            // Resolver idCidade
+            let idCidade = 'N/A';
+            if (cadastro && cadastro.idCidade && cadastro.idCidade !== 'Discord') {
+                idCidade = cadastro.idCidade;
+            } else {
+                const candComId = candidaturas.find(c => c.idCidade && c.idCidade !== 'Discord');
+                if (candComId) {
+                    idCidade = candComId.idCidade;
+                } else if (nick) {
+                    const match = nick.match(/\[(\d+)\]/);
+                    if (match) idCidade = match[1];
+                }
+            }
+
+            // Resolver nomeSobrenome
+            let nomeSobrenome = (cadastro && cadastro.nomeSobrenome) || nick || globalName || username || 'Oficial SSP';
+
+            // Resolver corporacao e batalhao
+            let corporacao = '';
+            let batalhao = '';
+            const memberRoles = member ? (member.roles || []) : [];
+
+            const ROLE_PMESP = '1510829612274548766';
+            const ROLE_PCESP = '1510829647284273263';
+
+            if (memberRoles.includes(ROLE_PMESP)) {
+                corporacao = 'PMESP';
+            } else if (memberRoles.includes(ROLE_PCESP)) {
+                corporacao = 'PCESP';
+            }
+
+            const dbCorps = await Corporation.find({ guildId }).lean();
+
+            for (const corp of dbCorps) {
+                if (corp.type === 'tag' && corp.roles?.geral && memberRoles.includes(corp.roles.geral)) {
+                    batalhao = corp.shortName || corp.name;
+                    break;
+                }
+            }
+
+            if (!batalhao) {
+                for (const corp of dbCorps) {
+                    if (corp.type === 'primary' && Array.isArray(corp.subdivisions)) {
+                        for (const sub of corp.subdivisions) {
+                            if (sub.roleId && memberRoles.includes(sub.roleId)) {
+                                batalhao = sub.shortName || sub.name;
+                                break;
+                            }
+                        }
+                    }
+                    if (batalhao) break;
+                }
+            }
+
+            cidadao = {
+                userId,
+                nomeSobrenome,
+                username: username || (cadastro && cadastro.username) || 'N/A',
+                idCidade,
+                corporacao,
+                batalhao,
+                status: (cadastro && cadastro.status) || 'aprovado',
+                createdAt: (cadastro && cadastro.createdAt) || new Date()
+            };
+        }
+
         if (!cidadao) {
             return res.status(404).json({ success: false, message: 'Cidadão não encontrado.' });
         }
-        const solicitacoes = await LspdCandidatura.find({ userId }).sort({ createdAt: -1 }).lean();
-        res.json({ success: true, cidadao, solicitacoes });
+
+        res.json({ success: true, cidadao, solicitacoes: candidaturas });
     } catch (error) {
         console.error("Erro em /api/cidadaos/:userId:", error);
         res.status(500).json({ success: false, message: 'Erro ao buscar dados do cidadão.' });
+    }
+});
+
+// Atualizar o Citizen ID (Passaporte) do oficial diretamente do painel web
+router.post('/cidadaos/update-citizen-id', requireAdmin, async (req, res) => {
+    try {
+        const guildId = process.env.GUILD_ID;
+        const { userId, idCidade } = req.body;
+
+        if (!userId || !idCidade || String(idCidade).trim() === '') {
+            return res.status(400).json({ success: false, message: 'Dados inválidos. ID de Usuário e Citizen ID são obrigatórios.' });
+        }
+
+        let cadastro = await LspdCadastro.findOne({ guildId, userId });
+        let oldId = cadastro ? cadastro.idCidade : 'Nenhum';
+
+        if (cadastro) {
+            cadastro.idCidade = idCidade.trim();
+            await cadastro.save();
+        } else {
+            // Oficial não possui cadastro local, vamos criá-lo
+            let nomeSobrenome = 'Oficial SSP';
+            let username = 'oficial';
+
+            try {
+                if (guildId) {
+                    const member = await discordAPIRequest(`/guilds/${guildId}/members/${userId}`, 'GET');
+                    if (member && member.user) {
+                        nomeSobrenome = member.nick || member.user.global_name || member.user.username;
+                        username = member.user.username;
+                    }
+                }
+            } catch (discordErr) {
+                console.error("Erro ao buscar oficial no Discord para novo cadastro:", discordErr.message);
+            }
+
+            cadastro = await LspdCadastro.create({
+                guildId,
+                userId,
+                username,
+                nomeSobrenome,
+                idCidade: idCidade.trim(),
+                status: 'aprovado',
+                aprovadoPor: req.session.user.id
+            });
+        }
+
+        // Registrar no audit log
+        await registrarAuditLog(
+            'cidadao_passaporte_atualizado',
+            'Passaporte de Oficial Atualizado',
+            `${req.session.user.displayName} atualizou o passaporte do oficial ${cadastro.nomeSobrenome} (ID: ${userId}) de "${oldId}" para "${idCidade}".`,
+            req.session.user.id,
+            req.session.user.username
+        );
+
+        res.json({ success: true, message: 'Passaporte atualizado com sucesso!', cidadao: cadastro });
+    } catch (error) {
+        console.error("Erro ao atualizar passaporte:", error);
+        res.status(500).json({ success: false, message: 'Erro ao atualizar passaporte.' });
     }
 });
 

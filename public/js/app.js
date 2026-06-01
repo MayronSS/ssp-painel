@@ -363,6 +363,48 @@ class PfPanelApp {
 
     this.modalRoot.innerHTML = this.templates.dossierModal(res.cidadao, res.solicitacoes, this.formatDateTime.bind(this));
     this.setupModalClose();
+
+    // Event listener para atualizar passaporte do oficial diretamente do modal
+    const saveBtn = this.modalRoot.querySelector('#save-dossier-citizen-id-btn');
+    const inputEl = this.modalRoot.querySelector('#edit-dossier-citizen-id');
+    saveBtn?.addEventListener('click', async () => {
+      const idCidade = inputEl.value.trim();
+      if (!idCidade) {
+        this.showToast('Insira um Citizen ID válido.', 'error');
+        return;
+      }
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      try {
+        const updateRes = await this.api.fetch('/cidadaos/update-citizen-id', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, idCidade })
+        });
+
+        if (updateRes.success) {
+          this.showToast(updateRes.message || 'Passaporte atualizado!', 'success');
+          
+          // Atualiza visualmente na mesma hora no subtítulo do modal
+          const displayEl = this.modalRoot.querySelector('#modal-display-citizen-id');
+          if (displayEl) displayEl.textContent = idCidade;
+          
+          // Re-renderizar lista de cidadãos silenciosamente em background
+          const pc = this.root.querySelector('#page-content');
+          if (pc && this.state.currentPage === 'cidadaos') {
+            await this.renderCidadaosPage(pc, true);
+          }
+        } else {
+          this.showToast(updateRes.message || 'Erro ao atualizar passaporte.', 'error');
+        }
+      } catch (err) {
+        this.showToast('Erro de rede ao atualizar passaporte.', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> Salvar';
+      }
+    });
   }
 
   async renderSolicitacoesPage(container, silent = false) {
@@ -1059,7 +1101,11 @@ class PfPanelApp {
           solicitacoesInternas: this.root.querySelector('#ch-solicitacoesInternas')?.value.trim() || null,
           blacklist: this.root.querySelector('#ch-blacklist')?.value.trim() || null,
           sugestoes: this.root.querySelector('#ch-sugestoes')?.value.trim() || null,
-          hierarchy: this.root.querySelector('#ch-hierarchy')?.value.trim() || null
+          hierarchy: this.root.querySelector('#ch-hierarchy')?.value.trim() || null,
+          avaliacaoPanel: this.root.querySelector('#ch-avaliacaoPanel')?.value.trim() || null,
+          avaliacaoLogs: this.root.querySelector('#ch-avaliacaoLogs')?.value.trim() || null,
+          academiaPanel: this.root.querySelector('#ch-academiaPanel')?.value.trim() || null,
+          academiaAvisos: this.root.querySelector('#ch-academiaAvisos')?.value.trim() || null
         },
         roles: {
           lspdGeral: this.root.querySelector('#rl-lspdGeral')?.value.trim() || null,
@@ -1073,6 +1119,8 @@ class PfPanelApp {
           adv2: this.root.querySelector('#rl-adv2')?.value.trim() || null,
           adv3: this.root.querySelector('#rl-adv3')?.value.trim() || null,
           administrativo: this.root.querySelector('#rl-administrativo')?.value.trim() || null,
+          ministrador: this.root.querySelector('#rl-ministrador')?.value.trim() || null,
+          cidadao: this.root.querySelector('#rl-cidadao')?.value.trim() || null,
           preAprovado: this.root.querySelector('#rl-preAprovado')?.value.trim() || null,
           caboRole: this.root.querySelector('#rl-caboRole')?.value.trim() || null
         }
@@ -2366,7 +2414,9 @@ class PfPanelApp {
               <thead class="bg-[var(--card-bg-soft)] border-b border-[var(--border-subtle)]">
                 <tr>
                   <th class="px-6 py-4 text-left font-bold text-[var(--text-muted)] uppercase tracking-[0.16em] text-[10px]">Cidadão / Policial</th>
-                  <th class="px-6 py-4 text-left font-bold text-[var(--text-muted)] uppercase tracking-[0.16em] text-[10px]">Citizen</th>
+                  <th class="px-6 py-4 text-left font-bold text-[var(--text-muted)] uppercase tracking-[0.16em] text-[10px]">Corporação</th>
+                  <th class="px-6 py-4 text-left font-bold text-[var(--text-muted)] uppercase tracking-[0.16em] text-[10px]">Batalhão</th>
+                  <th class="px-6 py-4 text-left font-bold text-[var(--text-muted)] uppercase tracking-[0.16em] text-[10px]">Citizen ID</th>
                   <th class="px-6 py-4 text-left font-bold text-[var(--text-muted)] uppercase tracking-[0.16em] text-[10px]">Discord</th>
                   <th class="px-6 py-4 text-right font-bold text-[var(--text-muted)] uppercase tracking-[0.16em] text-[10px]">Ações</th>
                 </tr>
@@ -2377,6 +2427,28 @@ class PfPanelApp {
                     <tr class="hover:bg-[var(--card-bg-soft)]/55 transition-colors group">
                       <td class="p-4 px-6 font-semibold text-zinc-200">
                         ${c.nomeSobrenome || c.username}
+                      </td>
+                      <td class="p-4 px-6 font-semibold text-zinc-200">
+                        ${c.corporacao === 'PMESP' 
+                          ? '<span class="px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-lg border bg-blue-500/10 text-blue-400 border-blue-500/20 inline-flex items-center gap-1"><i class="fas fa-shield-halved"></i> PMESP</span>'
+                          : (c.corporacao === 'PCESP'
+                            ? '<span class="px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-lg border bg-red-500/10 text-red-400 border-red-500/20 inline-flex items-center gap-1"><i class="fas fa-shield-halved"></i> PCESP</span>'
+                            : `<span class="px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-lg border bg-zinc-500/10 text-zinc-400 border-zinc-500/20 inline-flex items-center gap-1">${c.corporacao || 'SSP'}</span>`
+                          )
+                        }
+                      </td>
+                      <td class="p-4 px-6 font-semibold text-zinc-200">
+                        ${c.batalhao
+                          ? (() => {
+                              const bat = c.batalhao.toUpperCase();
+                              if (bat.includes('ROTA')) return '<span class="px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-lg border bg-zinc-800 text-zinc-200 border-zinc-700 inline-flex items-center gap-1"><i class="fas fa-crosshairs text-[10px]"></i> ROTA</span>';
+                              if (bat.includes('BAEP')) return '<span class="px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-lg border bg-amber-500/10 text-amber-400 border-amber-500/20 inline-flex items-center gap-1"><i class="fas fa-burst text-[10px]"></i> BAEP</span>';
+                              if (bat.includes('BPRV')) return '<span class="px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-lg border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 inline-flex items-center gap-1"><i class="fas fa-road text-[10px]"></i> BPRV</span>';
+                              if (bat.includes('CAV')) return '<span class="px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-lg border bg-sky-500/10 text-sky-400 border-sky-500/20 inline-flex items-center gap-1"><i class="fas fa-helicopter text-[10px]"></i> CAvPM</span>';
+                              return `<span class="px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-lg border bg-indigo-500/10 text-indigo-400 border-indigo-500/20 inline-flex items-center gap-1"><i class="fas fa-bookmark text-[10px]"></i> ${c.batalhao}</span>`;
+                            })()
+                          : '<span class="text-[var(--text-muted)] font-medium">-</span>'
+                        }
                       </td>
                       <td class="p-4 px-6 text-sm text-[var(--text-muted)] font-mono">${c.idCidade || 'N/A'}</td>
                       <td class="p-4 px-6 text-sm text-zinc-300 font-medium">@${c.username}</td>
@@ -2391,9 +2463,9 @@ class PfPanelApp {
                   `).join('')
                   : `
                     <tr>
-                      <td colspan="4" class="text-center p-12 text-[var(--text-muted)]">
+                      <td colspan="6" class="text-center p-12 text-[var(--text-muted)]">
                         <i class="fas fa-inbox text-3xl mb-3 block opacity-30"></i>
-                        Nenhum cidadão cadastrado.
+                        Nenhum oficial SSP encontrado.
                       </td>
                     </tr>
                   `
@@ -2516,7 +2588,7 @@ class PfPanelApp {
                 </div>
                 <div>
                   <h3 class="text-lg font-bold tracking-tight">${cidadao.nomeSobrenome}</h3>
-                  <p class="text-xs text-[var(--text-muted)] mt-0.5">Citizen: ${cidadao.idCidade} | Discord: @${cidadao.username}</p>
+                  <p class="text-xs text-[var(--text-muted)] mt-0.5">Citizen: <span id="modal-display-citizen-id">${cidadao.idCidade}</span> | Discord: @${cidadao.username}</p>
                 </div>
               </div>
               <button class="close-modal-btn btn-soft w-9 h-9 rounded-xl flex items-center justify-center">
@@ -2535,6 +2607,16 @@ class PfPanelApp {
                   <div>
                     <p class="text-xs text-[var(--text-muted)]">Data de Registro</p>
                     <p class="font-semibold text-zinc-200 mt-0.5">${formatDateTime(cidadao.createdAt)}</p>
+                  </div>
+                  <div class="col-span-2 border-t border-[var(--border-subtle)]/50 pt-3">
+                    <p class="text-[var(--text-muted)] uppercase tracking-wider font-bold mb-2">Passaporte / Citizen ID</p>
+                    <div class="flex gap-2">
+                      <input type="text" id="edit-dossier-citizen-id" value="${cidadao.idCidade && cidadao.idCidade !== 'N/A' && cidadao.idCidade !== 'Discord' ? cidadao.idCidade : ''}" placeholder="Preencha o ID do passaporte..." class="w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100 font-semibold" />
+                      <button id="save-dossier-citizen-id-btn" class="bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-lg shadow-brand-500/10 active:scale-98 flex items-center justify-center gap-1.5" data-userid="${cidadao.userId}">
+                        <i class="fas fa-save"></i> Salvar
+                      </button>
+                    </div>
+                    <p class="text-[9px] text-[var(--text-muted)] mt-1.5"><i class="fas fa-circle-info"></i> Preencha o passaporte do oficial SSP para permitir a sincronização e identificação correta.</p>
                   </div>
                 </div>
               </div>
@@ -3927,6 +4009,26 @@ class PfPanelApp {
                     <input type="text" id="ch-hierarchy" value="${ch.hierarchy || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
                     <div id="name-ch-hierarchy" class="mt-1.5 min-h-[15px]"></div>
                   </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel de Avaliações</label>
+                    <input type="text" id="ch-avaliacaoPanel" value="${ch.avaliacaoPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                    <div id="name-ch-avaliacaoPanel" class="mt-1.5 min-h-[15px]"></div>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Avaliações</label>
+                    <input type="text" id="ch-avaliacaoLogs" value="${ch.avaliacaoLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                    <div id="name-ch-avaliacaoLogs" class="mt-1.5 min-h-[15px]"></div>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel da Academia</label>
+                    <input type="text" id="ch-academiaPanel" value="${ch.academiaPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                    <div id="name-ch-academiaPanel" class="mt-1.5 min-h-[15px]"></div>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Avisos da Academia</label>
+                    <input type="text" id="ch-academiaAvisos" value="${ch.academiaAvisos || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                    <div id="name-ch-academiaAvisos" class="mt-1.5 min-h-[15px]"></div>
+                  </div>
                 </div>
               </div>
 
@@ -3999,6 +4101,16 @@ class PfPanelApp {
                     <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Cabo PMESP</label>
                     <input type="text" id="rl-caboRole" value="${rl.caboRole || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
                     <div id="name-rl-caboRole" class="mt-1.5 min-h-[15px]"></div>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Ministrador</label>
+                    <input type="text" id="rl-ministrador" value="${rl.ministrador || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                    <div id="name-rl-ministrador" class="mt-1.5 min-h-[15px]"></div>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Cidadão</label>
+                    <input type="text" id="rl-cidadao" value="${rl.cidadao || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                    <div id="name-rl-cidadao" class="mt-1.5 min-h-[15px]"></div>
                   </div>
                 </div>
               </div>

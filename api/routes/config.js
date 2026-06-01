@@ -72,6 +72,8 @@ router.get('/config', async (req, res) => {
                 adv2: process.env.ROLE_ADV_2,
                 adv3: process.env.ROLE_ADV_3,
                 administrativo: process.env.ROLE_ADMINISTRATIVO,
+                ministrador: process.env.ROLE_MINISTRADOR,
+                cidadao: process.env.ROLE_CIDADAO,
                 preAprovado: process.env.ROLE_PRE_APROVADO,
                 caboRole: process.env.ROLE_CABO
             }
