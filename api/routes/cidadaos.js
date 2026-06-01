@@ -98,9 +98,6 @@ router.get('/cidadaos', async (req, res) => {
                 const candId = candidaturaMap.get(userId);
                 if (candId) {
                     idCidade = candId;
-                } else if (nickname) {
-                    const match = nickname.match(/\[(\d+)\]/);
-                    if (match) idCidade = match[1];
                 }
             }
 
@@ -294,9 +291,6 @@ router.get('/cidadaos/:userId', async (req, res) => {
                 const candComId = candidaturas.find(c => c.idCidade && c.idCidade !== 'Discord');
                 if (candComId) {
                     idCidade = candComId.idCidade;
-                } else if (nick) {
-                    const match = nick.match(/\[(\d+)\]/);
-                    if (match) idCidade = match[1];
                 }
             }
 
