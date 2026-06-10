@@ -28,6 +28,7 @@ const warningsRouter = require('./routes/warnings');
 const officersRouter = require('./routes/officers');
 const notificationsRouter = require('./routes/notifications');
 const academyRouter = require('./routes/academy');
+const fivemRouter = require('./routes/fivem');
 
 const { requireAuth } = require('./middlewares/auth');
 
@@ -112,8 +113,9 @@ app.get('/api/health', async (req, res) => {
 
 // --- Registro de Rotas ---
 
-// Rotas de Autenticação (Algumas públicas, como login e callback)
+// Rotas Públicas (Sem autenticação de sessão)
 app.use('/api', authRouter);
+app.use('/api', fivemRouter); // Integração FiveM (usa Bearer token próprio)
 
 // Rotas Protegidas (Exigem autenticação ativa)
 app.use('/api', requireAuth, dashboardRouter);
