@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const LspdCadastro = require('../../models/LspdCadastro');
 const LspdCandidatura = require('../../models/LspdCandidatura');
-const CorregedoriaCase = require('../../models/CorregedoriaCase');
+
 const LspdTranscript = require('../../models/LspdTranscript');
 const Ticket = require('../../models/Ticket');
 const Ponto = require('../../models/Ponto');
@@ -22,8 +22,6 @@ router.get('/dashboard/summary', async (req, res) => {
             solicitacoesPendentes,
             portesAprovados,
             passaportesAprovados,
-            casosCorregedoriaAbertos,
-            casosCorregedoriaFechados,
             totalTranscripts,
             ticketsAbertos,
             ticketsFechados,
@@ -38,8 +36,6 @@ router.get('/dashboard/summary', async (req, res) => {
             LspdCandidatura.countDocuments({ status: 'pendente' }),
             LspdCandidatura.countDocuments({ modulo: 'porte', status: 'aprovado' }),
             LspdCandidatura.countDocuments({ modulo: 'paraguaio', status: 'aprovado' }),
-            CorregedoriaCase.countDocuments({ status: { $in: ['voting', 'applied'] } }),
-            CorregedoriaCase.countDocuments({ status: 'archived' }),
             LspdTranscript.countDocuments(),
             Ticket.countDocuments({ status: 'open' }),
             Ticket.countDocuments({ status: 'closed' }),
@@ -111,8 +107,6 @@ router.get('/dashboard/summary', async (req, res) => {
             solicitacoesPendentes,
             portesAprovados,
             passaportesAprovados,
-            casosCorregedoriaAbertos,
-            casosCorregedoriaFechados,
             totalTranscripts,
             ticketsAbertos,
             ticketsFechados,

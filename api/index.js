@@ -19,7 +19,7 @@ const cidadaosRouter = require('./routes/cidadaos');
 const solicitacoesRouter = require('./routes/solicitacoes');
 const pontoRouter = require('./routes/ponto');
 const ticketsRouter = require('./routes/tickets');
-const corregedoriaRouter = require('./routes/corregedoria');
+
 const transcriptsRouter = require('./routes/transcripts');
 const configRouter = require('./routes/config');
 const logsRouter = require('./routes/logs');
@@ -121,7 +121,7 @@ app.use('/api', requireAuth, cidadaosRouter);
 app.use('/api', requireAuth, solicitacoesRouter);
 app.use('/api', requireAuth, pontoRouter);
 app.use('/api', requireAuth, ticketsRouter);
-app.use('/api', requireAuth, corregedoriaRouter);
+
 app.use('/api', requireAuth, transcriptsRouter);
 app.use('/api', requireAuth, configRouter);
 app.use('/api', requireAuth, logsRouter);

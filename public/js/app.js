@@ -66,7 +66,6 @@ class PfPanelApp {
       solicitacoes: 'Mesa de Análise',
       ponto: 'Controle de Ponto',
       tickets: 'Controle de Tickets',
-      corregedoria: 'Corregedoria Geral',
       transcripts: 'Transcripts de Atendimento',
       logs: 'Auditoria de Sistema',
       reports: 'Emissão de Relatórios',
@@ -84,7 +83,6 @@ class PfPanelApp {
       solicitacoes: 'Fila de análise operacional de visto, porte de arma e recrutamento.',
       ponto: 'Monitoramento de turnos, oficiais em patrulha e rankings de horas.',
       tickets: 'Controle total dos atendimentos abertos, fechados, assumidos e vinculados ao Discord.',
-      corregedoria: 'Controle de denúncias, reclamações e ocorrências enviadas pelos cidadãos.',
       transcripts: 'Histórico interativo e transcripts completos dos tickets de atendimento encerrados.',
       logs: 'Registro detalhado de eventos e ações administrativas no bot e no painel.',
       reports: 'Geração de dados em Excel (XLSX) e relatórios executivos em formato PDF.',
@@ -115,7 +113,6 @@ class PfPanelApp {
       solicitacoes: this.renderSolicitacoesPage,
       ponto: this.renderPontoPage,
       tickets: this.renderTicketsPage,
-      corregedoria: this.renderCorregedoriaPage,
       transcripts: this.renderTranscriptsPage,
       logs: this.renderLogsPage,
       reports: this.renderReportsPage,
@@ -134,7 +131,7 @@ class PfPanelApp {
   }
 
   startLiveRefresh(page) {
-    const livePages = new Set(['dashboard', 'cidadaos', 'solicitacoes', 'ponto', 'tickets', 'corregedoria', 'transcripts', 'logs', 'ausencias', 'warnings', 'officers', 'ranking', 'academia']);
+    const livePages = new Set(['dashboard', 'cidadaos', 'solicitacoes', 'ponto', 'tickets', 'transcripts', 'logs', 'ausencias', 'warnings', 'officers', 'ranking', 'academia']);
     if (!livePages.has(page)) return;
 
     this.state.timers.liveRefresh = setInterval(async () => {
@@ -257,12 +254,11 @@ class PfPanelApp {
         'Cidadãos Fichados': summary.totalCidadaos,
         'Solicitações Pendentes': summary.solicitacoesPendentes,
         'Tickets Abertos': summary.ticketsAbertos || 0,
-        'Pontos Abertos': summary.pontosAbertos || 0,
+        'Oficiais em Serviço': summary.pontosAbertos || 0,
         'Transcripts Salvos': summary.totalTranscripts,
         'Editais Aprovados': summary.editaisAprovados || 0,
         'Portes Concedidos': summary.portesAprovados,
-        'Vistos Concedidos': summary.passaportesAprovados,
-        'Corregedoria (Abertas)': summary.casosCorregedoriaAbertos
+        'Vistos Concedidos': summary.passaportesAprovados
       };
 
       for (const [title, value] of Object.entries(cards)) {
@@ -2154,9 +2150,7 @@ class PfPanelApp {
           <a href="#tickets" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
             <i class="fas fa-headset w-5 mr-3"></i> Tickets
           </a>
-          <a href="#corregedoria" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-building-shield w-5 mr-3"></i> Corregedoria
-          </a>
+
           <a href="#academia" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
             <i class="fas fa-graduation-cap w-5 mr-3"></i> Academia
           </a>
@@ -2298,12 +2292,11 @@ class PfPanelApp {
           ${this.templates.summaryCard('Cidadãos Fichados', summary.totalCidadaos, 'fa-users', 'brand')}
           ${this.templates.summaryCard('Solicitações Pendentes', summary.solicitacoesPendentes, 'fa-gavel', 'amber')}
           ${this.templates.summaryCard('Tickets Abertos', summary.ticketsAbertos || 0, 'fa-headset', 'brand')}
-          ${this.templates.summaryCard('Pontos Abertos', summary.pontosAbertos || 0, 'fa-user-clock', 'emerald')}
+          ${this.templates.summaryCard('Oficiais em Serviço', summary.pontosAbertos || 0, 'fa-user-clock', 'emerald')}
           ${this.templates.summaryCard('Transcripts Salvos', summary.totalTranscripts, 'fa-file-invoice', 'indigo')}
           ${this.templates.summaryCard('Editais Aprovados', summary.editaisAprovados || 0, 'fa-user-check', 'emerald')}
           ${this.templates.summaryCard('Portes Concedidos', summary.portesAprovados, 'fa-gun', 'emerald')}
           ${this.templates.summaryCard('Vistos Concedidos', summary.passaportesAprovados, 'fa-passport', 'violet')}
-          ${this.templates.summaryCard('Corregedoria (Abertas)', summary.casosCorregedoriaAbertos, 'fa-building-shield', 'rose')}
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
