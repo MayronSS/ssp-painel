@@ -38,11 +38,13 @@ router.get('/auth/discord/callback', async (req, res) => {
             return res.status(403).send('Acesso Negado: Você precisa estar no servidor Discord da SSP para acessar o painel.');
         }
 
-        // 4. Buscar papéis autorizados do banco de dados (GuildConfig)
+        // 4. Buscar configuração do servidor
         const config = await getActiveGuildConfig();
-        const guildId = process.env.GUILD_ID;
 
-        // IDs de cargos administrativos e gerais
+        // Cargo OBRIGATÓRIO para acessar o painel (SSP)
+        const REQUIRED_PANEL_ROLE = '1383913498571964447';
+
+        // IDs de cargos administrativos (permissões internas do painel)
         const adminRoleIds = [
             config?.roles?.comandoAdmin,
             config?.roles?.setupAuthorized,
@@ -52,24 +54,15 @@ router.get('/auth/discord/callback', async (req, res) => {
             process.env.ROLE_ADMINISTRATIVO
         ].filter(Boolean);
 
-        const policeRoleIds = [
-            config?.roles?.policial,
-            config?.roles?.lspdGeral,
-            config?.roles?.ticketStaff,
-            process.env.ROLE_POLICIAL,
-            process.env.ROLE_LSPD,
-            process.env.ROLE_TICKET_STAFF
-        ].filter(Boolean);
-
         const memberRoles = member.roles || [];
 
-        // Verificar autorizações
-        const isAdmin = memberRoles.some(roleId => adminRoleIds.includes(roleId));
-        const isOfficer = memberRoles.some(roleId => policeRoleIds.includes(roleId));
-
-        if (!isAdmin && !isOfficer) {
-            return res.status(403).send('Acesso Negado: Você não possui cargos autorizados na SSP para usar este painel.');
+        // Verificar se possui o cargo obrigatório para acessar o painel
+        if (!memberRoles.includes(REQUIRED_PANEL_ROLE)) {
+            return res.status(403).send('Acesso Negado: Você não possui o cargo autorizado da SSP para usar este painel.');
         }
+
+        // Verificar se é admin (para permissões internas)
+        const isAdmin = memberRoles.some(roleId => adminRoleIds.includes(roleId));
 
         // 5. Configurar sessão do usuário
         req.session.user = {
