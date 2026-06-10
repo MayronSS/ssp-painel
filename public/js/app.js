@@ -949,7 +949,7 @@ class PfPanelApp {
         modules: { tickets: true, ponto: true, edital: true },
         embeds: { design: { logo: '', colors: {} }, tickets: { panel: {} }, ponto: { panel: {} }, edital: { panel: {} } }
       };
-      container.innerHTML = this.templates.settingsPage(config);
+      container.innerHTML = this.templates.settingsPage(config, res.pmesp, res.pcesp);
       this.setupSettingsListeners(config);
     } catch (err) {
       console.error(err);
@@ -1070,30 +1070,13 @@ class PfPanelApp {
           warning: this.root.querySelector('#mod-warning').checked
         },
         channels: {
-          ticketsPanel: this.root.querySelector('#ch-ticketsPanel')?.value.trim() || null,
-          ticketsCategory: this.root.querySelector('#ch-ticketsCategory')?.value.trim() || null,
-          corregedoriaCategory: this.root.querySelector('#ch-corregedoriaCategory')?.value.trim() || null,
-          editalPanel: this.root.querySelector('#ch-editalPanel')?.value.trim() || null,
-          editalAvaliacao: this.root.querySelector('#ch-editalAvaliacao')?.value.trim() || null,
-          editalResultados: this.root.querySelector('#ch-editalResultados')?.value.trim() || null,
-          editalAvaliacaoPmesp: this.root.querySelector('#ch-editalAvaliacaoPmesp')?.value.trim() || null,
-          editalAvaliacaoPcesp: this.root.querySelector('#ch-editalAvaliacaoPcesp')?.value.trim() || null,
-          editalResultadosPmesp: this.root.querySelector('#ch-editalResultadosPmesp')?.value.trim() || null,
-          editalResultadosPcesp: this.root.querySelector('#ch-editalResultadosPcesp')?.value.trim() || null,
           pontoPanel: this.root.querySelector('#ch-pontoPanel')?.value.trim() || null,
-          pontoLogs: this.root.querySelector('#ch-pontoLogs')?.value.trim() || null,
-          pontoLogsPmesp: this.root.querySelector('#ch-pontoLogsPmesp')?.value.trim() || null,
-          pontoLogsPcesp: this.root.querySelector('#ch-pontoLogsPcesp')?.value.trim() || null,
+          ausenciaPanel: this.root.querySelector('#ch-ausenciaPanel')?.value.trim() || null,
+          editalPanel: this.root.querySelector('#ch-editalPanel')?.value.trim() || null,
           copomLogs: this.root.querySelector('#ch-copomLogs')?.value.trim() || null,
           adminLogs: this.root.querySelector('#ch-adminLogs')?.value.trim() || null,
+          corregedoriaCategory: this.root.querySelector('#ch-corregedoriaCategory')?.value.trim() || null,
           corregedoriaResults: this.root.querySelector('#ch-corregedoriaResults')?.value.trim() || null,
-          disciplinaryWarnings: this.root.querySelector('#ch-disciplinaryWarnings')?.value.trim() || null,
-          ausenciaPanel: this.root.querySelector('#ch-ausenciaPanel')?.value.trim() || null,
-          ausenciaLogs: this.root.querySelector('#ch-ausenciaLogs')?.value.trim() || null,
-          ausenciaLogsPmesp: this.root.querySelector('#ch-ausenciaLogsPmesp')?.value.trim() || null,
-          ausenciaLogsPcesp: this.root.querySelector('#ch-ausenciaLogsPcesp')?.value.trim() || null,
-          warningPanel: this.root.querySelector('#ch-warningPanel')?.value.trim() || null,
-          memberLogs: this.root.querySelector('#ch-memberLogs')?.value.trim() || null,
           memberLogsEntrada: this.root.querySelector('#ch-memberLogsEntrada')?.value.trim() || null,
           memberLogsSaida: this.root.querySelector('#ch-memberLogsSaida')?.value.trim() || null,
           exoneracoes: this.root.querySelector('#ch-exoneracoes')?.value.trim() || null,
@@ -1108,21 +1091,57 @@ class PfPanelApp {
           academiaAvisos: this.root.querySelector('#ch-academiaAvisos')?.value.trim() || null
         },
         roles: {
-          lspdGeral: this.root.querySelector('#rl-lspdGeral')?.value.trim() || null,
-          comandoAdmin: this.root.querySelector('#rl-comandoAdmin')?.value.trim() || null,
-          ticketStaff: this.root.querySelector('#rl-ticketStaff')?.value.trim() || null,
-          policial: this.root.querySelector('#rl-policial')?.value.trim() || null,
           setupAuthorized: this.root.querySelector('#rl-setupAuthorized')?.value.trim() || null,
-          recrutaCadete: this.root.querySelector('#rl-recrutaCadete')?.value.trim() || null,
-          advVerbal: this.root.querySelector('#rl-advVerbal')?.value.trim() || null,
-          adv1: this.root.querySelector('#rl-adv1')?.value.trim() || null,
-          adv2: this.root.querySelector('#rl-adv2')?.value.trim() || null,
-          adv3: this.root.querySelector('#rl-adv3')?.value.trim() || null,
-          administrativo: this.root.querySelector('#rl-administrativo')?.value.trim() || null,
-          ministrador: this.root.querySelector('#rl-ministrador')?.value.trim() || null,
-          cidadao: this.root.querySelector('#rl-cidadao')?.value.trim() || null,
-          preAprovado: this.root.querySelector('#rl-preAprovado')?.value.trim() || null,
-          caboRole: this.root.querySelector('#rl-caboRole')?.value.trim() || null
+          cidadao: this.root.querySelector('#rl-cidadao')?.value.trim() || null
+        },
+        pmesp: {
+          channels: {
+            ticketsPanel: this.root.querySelector('#pmesp-ch-ticketsPanel')?.value.trim() || null,
+            ticketsCategory: this.root.querySelector('#pmesp-ch-ticketsCategory')?.value.trim() || null,
+            warningPanel: this.root.querySelector('#pmesp-ch-warningPanel')?.value.trim() || null,
+            pontoLogsPmesp: this.root.querySelector('#pmesp-ch-pontoLogsPmesp')?.value.trim() || null,
+            ausenciaLogsPmesp: this.root.querySelector('#pmesp-ch-ausenciaLogsPmesp')?.value.trim() || null,
+            editalAvaliacaoPmesp: this.root.querySelector('#pmesp-ch-editalAvaliacaoPmesp')?.value.trim() || null,
+            editalResultadosPmesp: this.root.querySelector('#pmesp-ch-editalResultadosPmesp')?.value.trim() || null
+          },
+          roles: {
+            geral: this.root.querySelector('#pmesp-rl-geral')?.value.trim() || null,
+            comando: this.root.querySelector('#pmesp-rl-comando')?.value.trim() || null,
+            staff: this.root.querySelector('#pmesp-rl-staff')?.value.trim() || null,
+            recruta: this.root.querySelector('#pmesp-rl-recruta')?.value.trim() || null,
+            preAprovado: this.root.querySelector('#pmesp-rl-preAprovado')?.value.trim() || null,
+            advVerbal: this.root.querySelector('#pmesp-rl-advVerbal')?.value.trim() || null,
+            adv1: this.root.querySelector('#pmesp-rl-adv1')?.value.trim() || null,
+            adv2: this.root.querySelector('#pmesp-rl-adv2')?.value.trim() || null,
+            adv3: this.root.querySelector('#pmesp-rl-adv3')?.value.trim() || null,
+            administrativo: this.root.querySelector('#pmesp-rl-administrativo')?.value.trim() || null,
+            ministrador: this.root.querySelector('#pmesp-rl-ministrador')?.value.trim() || null,
+            caboRole: this.root.querySelector('#pmesp-rl-caboRole')?.value.trim() || null
+          }
+        },
+        pcesp: {
+          channels: {
+            ticketsPanel: this.root.querySelector('#pcesp-ch-ticketsPanel')?.value.trim() || null,
+            ticketsCategory: this.root.querySelector('#pcesp-ch-ticketsCategory')?.value.trim() || null,
+            warningPanel: this.root.querySelector('#pcesp-ch-warningPanel')?.value.trim() || null,
+            pontoLogsPcesp: this.root.querySelector('#pcesp-ch-pontoLogsPcesp')?.value.trim() || null,
+            ausenciaLogsPcesp: this.root.querySelector('#pcesp-ch-ausenciaLogsPcesp')?.value.trim() || null,
+            editalAvaliacaoPcesp: this.root.querySelector('#pcesp-ch-editalAvaliacaoPcesp')?.value.trim() || null,
+            editalResultadosPcesp: this.root.querySelector('#pcesp-ch-editalResultadosPcesp')?.value.trim() || null
+          },
+          roles: {
+            geral: this.root.querySelector('#pcesp-rl-geral')?.value.trim() || null,
+            comando: this.root.querySelector('#pcesp-rl-comando')?.value.trim() || null,
+            staff: this.root.querySelector('#pcesp-rl-staff')?.value.trim() || null,
+            recruta: this.root.querySelector('#pcesp-rl-recruta')?.value.trim() || null,
+            preAprovado: this.root.querySelector('#pcesp-rl-preAprovado')?.value.trim() || null,
+            advVerbal: this.root.querySelector('#pcesp-rl-advVerbal')?.value.trim() || null,
+            adv1: this.root.querySelector('#pcesp-rl-adv1')?.value.trim() || null,
+            adv2: this.root.querySelector('#pcesp-rl-adv2')?.value.trim() || null,
+            adv3: this.root.querySelector('#pcesp-rl-adv3')?.value.trim() || null,
+            administrativo: this.root.querySelector('#pcesp-rl-administrativo')?.value.trim() || null,
+            ministrador: this.root.querySelector('#pcesp-rl-ministrador')?.value.trim() || null
+          }
         }
       };
 
@@ -3788,18 +3807,28 @@ class PfPanelApp {
         </div>
       `,
 
-      settingsPage: (c) => {
+      settingsPage: (c, pmespDoc, pcespDoc) => {
         const ch = c.channels || {};
         const rl = c.roles || {};
-        const md = c.modules || { tickets: true, ponto: true, edital: true, ausencia: true, warning: true };
+        const md = c.modules || { tickets: true, ponto: true, edital: true, ausencia: true, warning: true, avaliacao: true };
+
+        // Obter roles e channels das corporações
+        const pmesp = pmespDoc || { roles: {}, channels: {} };
+        const pmCh = pmesp.channels || {};
+        const pmRl = pmesp.roles || {};
+
+        const pcesp = pcespDoc || { roles: {}, channels: {} };
+        const pcCh = pcesp.channels || {};
+        const pcRl = pcesp.roles || {};
 
         return `
-          <div class="max-w-4xl mx-auto">
+          <div class="max-w-4xl mx-auto space-y-6">
             <form id="settings-form" class="space-y-6">
               
+              <!-- ATIVAÇÃO DE MÓDULOS -->
               <div class="card-premium rounded-2xl p-6">
                 <h3 class="font-bold text-base text-zinc-100 border-b border-[var(--border-subtle)] pb-3 mb-4 flex items-center gap-2">
-                  <i class="fas fa-toggle-on text-brand-500"></i> Ativação de Módulos
+                  <i class="fas fa-toggle-on text-brand-500"></i> Ativação de Módulos Globais
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <label class="flex items-center gap-3 p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--card-bg-soft)]/50 cursor-pointer hover:border-brand-500/35 transition-colors">
@@ -3830,7 +3859,7 @@ class PfPanelApp {
                     <input type="checkbox" id="mod-ausencia" class="w-4 h-4 rounded text-brand-500 focus:ring-brand-500 accent-brand-500" ${md.ausencia ? 'checked' : ''}>
                     <div>
                       <p class="text-xs font-bold text-zinc-200">Módulo Ausências</p>
-                      <p class="text-[10px] text-[var(--text-muted)]">Gerenciamento de pedidos de licença.</p>
+                      <p class="text-[10px] text-[var(--text-muted)]">Gerenciamento de licenças.</p>
                     </div>
                   </label>
 
@@ -3838,283 +3867,363 @@ class PfPanelApp {
                     <input type="checkbox" id="mod-warning" class="w-4 h-4 rounded text-brand-500 focus:ring-brand-500 accent-brand-500" ${md.warning ? 'checked' : ''}>
                     <div>
                       <p class="text-xs font-bold text-zinc-200">Módulo Advertências</p>
-                      <p class="text-[10px] text-[var(--text-muted)]">Aplicação de punições disciplinares.</p>
+                      <p class="text-[10px] text-[var(--text-muted)]">Punições disciplinares.</p>
                     </div>
                   </label>
                 </div>
               </div>
 
+              <!-- CONFIGURAÇÕES GLOBAIS SSP -->
               <div class="card-premium rounded-2xl p-6">
                 <h3 class="font-bold text-base text-zinc-100 border-b border-[var(--border-subtle)] pb-3 mb-4 flex items-center gap-2">
-                  <i class="fas fa-hashtag text-brand-500"></i> Mapeamento de Canais (IDs)
+                  <i class="fas fa-globe text-brand-500"></i> Configurações Globais (SSP)
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="space-y-6">
                   <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel de Tickets</label>
-                    <input type="text" id="ch-ticketsPanel" value="${ch.ticketsPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-ticketsPanel" class="mt-1.5 min-h-[15px]"></div>
+                    <h4 class="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-wider">Canais SSP</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel Bate-Ponto</label>
+                        <input type="text" id="ch-pontoPanel" value="${ch.pontoPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-pontoPanel" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel Ausências</label>
+                        <input type="text" id="ch-ausenciaPanel" value="${ch.ausenciaPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-ausenciaPanel" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel do Edital</label>
+                        <input type="text" id="ch-editalPanel" value="${ch.editalPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-editalPanel" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de COPOM</label>
+                        <input type="text" id="ch-copomLogs" value="${ch.copomLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-copomLogs" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Admin</label>
+                        <input type="text" id="ch-adminLogs" value="${ch.adminLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-adminLogs" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Categoria Corregedoria</label>
+                        <input type="text" id="ch-corregedoriaCategory" value="${ch.corregedoriaCategory || ''}" placeholder="ID da categoria" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-corregedoriaCategory" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Resultados Corregedoria</label>
+                        <input type="text" id="ch-corregedoriaResults" value="${ch.corregedoriaResults || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-corregedoriaResults" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs Entrada Membros</label>
+                        <input type="text" id="ch-memberLogsEntrada" value="${ch.memberLogsEntrada || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-memberLogsEntrada" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs Saída Membros</label>
+                        <input type="text" id="ch-memberLogsSaida" value="${ch.memberLogsSaida || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-memberLogsSaida" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs Exonerações</label>
+                        <input type="text" id="ch-exoneracoes" value="${ch.exoneracoes || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-exoneracoes" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs Transferências</label>
+                        <input type="text" id="ch-transferencias" value="${ch.transferencias || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-transferencias" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Solicitações Internas</label>
+                        <input type="text" id="ch-solicitacoesInternas" value="${ch.solicitacoesInternas || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-solicitacoesInternas" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Canal Blacklist</label>
+                        <input type="text" id="ch-blacklist" value="${ch.blacklist || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-blacklist" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Canal Sugestões</label>
+                        <input type="text" id="ch-sugestoes" value="${ch.sugestoes || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-sugestoes" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Canal Hierarquia</label>
+                        <input type="text" id="ch-hierarchy" value="${ch.hierarchy || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-hierarchy" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel Avaliações</label>
+                        <input type="text" id="ch-avaliacaoPanel" value="${ch.avaliacaoPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-avaliacaoPanel" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs Avaliações</label>
+                        <input type="text" id="ch-avaliacaoLogs" value="${ch.avaliacaoLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-avaliacaoLogs" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel Academia</label>
+                        <input type="text" id="ch-academiaPanel" value="${ch.academiaPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-academiaPanel" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Avisos Academia</label>
+                        <input type="text" id="ch-academiaAvisos" value="${ch.academiaAvisos || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-ch-academiaAvisos" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Categoria de Tickets</label>
-                    <input type="text" id="ch-ticketsCategory" value="${ch.ticketsCategory || ''}" placeholder="ID da categoria" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-ticketsCategory" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel de Bate-Ponto</label>
-                    <input type="text" id="ch-pontoPanel" value="${ch.pontoPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-pontoPanel" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ponto</label>
-                    <input type="text" id="ch-pontoLogs" value="${ch.pontoLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-pontoLogs" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel do Edital</label>
-                    <input type="text" id="ch-editalPanel" value="${ch.editalPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-editalPanel" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Avaliação de Edital</label>
-                    <input type="text" id="ch-editalAvaliacao" value="${ch.editalAvaliacao || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-editalAvaliacao" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Resultados do Edital</label>
-                    <input type="text" id="ch-editalResultados" value="${ch.editalResultados || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-editalResultados" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de COPOM</label>
-                    <input type="text" id="ch-copomLogs" value="${ch.copomLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-copomLogs" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs do Admin</label>
-                    <input type="text" id="ch-adminLogs" value="${ch.adminLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-adminLogs" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel de Ausências</label>
-                    <input type="text" id="ch-ausenciaPanel" value="${ch.ausenciaPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-ausenciaPanel" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ausências</label>
-                    <input type="text" id="ch-ausenciaLogs" value="${ch.ausenciaLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-ausenciaLogs" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel de Advertências</label>
-                    <input type="text" id="ch-warningPanel" value="${ch.warningPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-warningPanel" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Advertências</label>
-                    <input type="text" id="ch-disciplinaryWarnings" value="${ch.disciplinaryWarnings || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-disciplinaryWarnings" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Membros</label>
-                    <input type="text" id="ch-memberLogs" value="${ch.memberLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-memberLogs" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Categoria de Corregedoria</label>
-                    <input type="text" id="ch-corregedoriaCategory" value="${ch.corregedoriaCategory || ''}" placeholder="ID da categoria" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-corregedoriaCategory" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Resultados de Corregedoria</label>
-                    <input type="text" id="ch-corregedoriaResults" value="${ch.corregedoriaResults || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-corregedoriaResults" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Edital Avaliação PMESP</label>
-                    <input type="text" id="ch-editalAvaliacaoPmesp" value="${ch.editalAvaliacaoPmesp || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-editalAvaliacaoPmesp" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Edital Resultados PMESP</label>
-                    <input type="text" id="ch-editalResultadosPmesp" value="${ch.editalResultadosPmesp || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-editalResultadosPmesp" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Edital Avaliação PCESP</label>
-                    <input type="text" id="ch-editalAvaliacaoPcesp" value="${ch.editalAvaliacaoPcesp || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-editalAvaliacaoPcesp" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Edital Resultados PCESP</label>
-                    <input type="text" id="ch-editalResultadosPcesp" value="${ch.editalResultadosPcesp || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-editalResultadosPcesp" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ponto PMESP</label>
-                    <input type="text" id="ch-pontoLogsPmesp" value="${ch.pontoLogsPmesp || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-pontoLogsPmesp" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ponto PCESP</label>
-                    <input type="text" id="ch-pontoLogsPcesp" value="${ch.pontoLogsPcesp || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-pontoLogsPcesp" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ausência PMESP</label>
-                    <input type="text" id="ch-ausenciaLogsPmesp" value="${ch.ausenciaLogsPmesp || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-ausenciaLogsPmesp" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ausência PCESP</label>
-                    <input type="text" id="ch-ausenciaLogsPcesp" value="${ch.ausenciaLogsPcesp || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-ausenciaLogsPcesp" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Entrada Membros</label>
-                    <input type="text" id="ch-memberLogsEntrada" value="${ch.memberLogsEntrada || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-memberLogsEntrada" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Saída Membros</label>
-                    <input type="text" id="ch-memberLogsSaida" value="${ch.memberLogsSaida || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-memberLogsSaida" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Exonerações</label>
-                    <input type="text" id="ch-exoneracoes" value="${ch.exoneracoes || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-exoneracoes" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Transferências</label>
-                    <input type="text" id="ch-transferencias" value="${ch.transferencias || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-transferencias" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Solicitações Internas</label>
-                    <input type="text" id="ch-solicitacoesInternas" value="${ch.solicitacoesInternas || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-solicitacoesInternas" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Canal Blacklist</label>
-                    <input type="text" id="ch-blacklist" value="${ch.blacklist || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-blacklist" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Canal de Sugestões</label>
-                    <input type="text" id="ch-sugestoes" value="${ch.sugestoes || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-sugestoes" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Canal da Hierarquia</label>
-                    <input type="text" id="ch-hierarchy" value="${ch.hierarchy || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-hierarchy" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel de Avaliações</label>
-                    <input type="text" id="ch-avaliacaoPanel" value="${ch.avaliacaoPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-avaliacaoPanel" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Avaliações</label>
-                    <input type="text" id="ch-avaliacaoLogs" value="${ch.avaliacaoLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-avaliacaoLogs" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel da Academia</label>
-                    <input type="text" id="ch-academiaPanel" value="${ch.academiaPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-academiaPanel" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Avisos da Academia</label>
-                    <input type="text" id="ch-academiaAvisos" value="${ch.academiaAvisos || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-ch-academiaAvisos" class="mt-1.5 min-h-[15px]"></div>
+
+                  <div class="border-t border-[var(--border-subtle)] pt-4">
+                    <h4 class="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-wider">Cargos SSP Globais</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Autorizado Setup</label>
+                        <input type="text" id="rl-setupAuthorized" value="${rl.setupAuthorized || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-rl-setupAuthorized" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Cidadão</label>
+                        <input type="text" id="rl-cidadao" value="${rl.cidadao || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-rl-cidadao" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="card-premium rounded-2xl p-6">
+              <!-- CONFIGURAÇÕES PMESP -->
+              <div class="card-premium rounded-2xl p-6 border-l-4 border-blue-500/50">
                 <h3 class="font-bold text-base text-zinc-100 border-b border-[var(--border-subtle)] pb-3 mb-4 flex items-center gap-2">
-                  <i class="fas fa-user-shield text-brand-500"></i> Cargos e Permissões (IDs)
+                  <i class="fas fa-shield-alt text-blue-500"></i> Configurações PMESP (Polícia Militar)
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="space-y-6">
                   <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo SSP Geral</label>
-                    <input type="text" id="rl-lspdGeral" value="${rl.lspdGeral || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-lspdGeral" class="mt-1.5 min-h-[15px]"></div>
+                    <h4 class="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-wider">Canais Exclusivos PMESP</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel de Tickets</label>
+                        <input type="text" id="pmesp-ch-ticketsPanel" value="${pmCh.ticketsPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-ch-ticketsPanel" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Categoria de Tickets</label>
+                        <input type="text" id="pmesp-ch-ticketsCategory" value="${pmCh.ticketsCategory || ''}" placeholder="ID da categoria" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-ch-ticketsCategory" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel Advertências</label>
+                        <input type="text" id="pmesp-ch-warningPanel" value="${pmCh.warningPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-ch-warningPanel" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ponto</label>
+                        <input type="text" id="pmesp-ch-pontoLogsPmesp" value="${pmCh.pontoLogsPmesp || pmCh.pontoLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-ch-pontoLogsPmesp" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ausência</label>
+                        <input type="text" id="pmesp-ch-ausenciaLogsPmesp" value="${pmCh.ausenciaLogsPmesp || pmCh.ausenciaLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-ch-ausenciaLogsPmesp" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Edital Avaliação</label>
+                        <input type="text" id="pmesp-ch-editalAvaliacaoPmesp" value="${pmCh.editalAvaliacaoPmesp || pmCh.editalAvaliacao || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-ch-editalAvaliacaoPmesp" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Edital Resultados</label>
+                        <input type="text" id="pmesp-ch-editalResultadosPmesp" value="${pmCh.editalResultadosPmesp || pmCh.editalResultados || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-ch-editalResultadosPmesp" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Comando (Admin)</label>
-                    <input type="text" id="rl-comandoAdmin" value="${rl.comandoAdmin || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-comandoAdmin" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Staff de Tickets</label>
-                    <input type="text" id="rl-ticketStaff" value="${rl.ticketStaff || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-ticketStaff" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Autorizado Setup</label>
-                    <input type="text" id="rl-setupAuthorized" value="${rl.setupAuthorized || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-setupAuthorized" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Recruta/Cadete</label>
-                    <input type="text" id="rl-recrutaCadete" value="${rl.recrutaCadete || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-recrutaCadete" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Oficial/Policial</label>
-                    <input type="text" id="rl-policial" value="${rl.policial || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-policial" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV Verbal</label>
-                    <input type="text" id="rl-advVerbal" value="${rl.advVerbal || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-advVerbal" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV 1</label>
-                    <input type="text" id="rl-adv1" value="${rl.adv1 || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-adv1" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV 2</label>
-                    <input type="text" id="rl-adv2" value="${rl.adv2 || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-adv2" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV 3</label>
-                    <input type="text" id="rl-adv3" value="${rl.adv3 || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-adv3" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Administrativo</label>
-                    <input type="text" id="rl-administrativo" value="${rl.administrativo || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-administrativo" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Pré-Aprovado</label>
-                    <input type="text" id="rl-preAprovado" value="${rl.preAprovado || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-preAprovado" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Cabo PMESP</label>
-                    <input type="text" id="rl-caboRole" value="${rl.caboRole || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-caboRole" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Ministrador</label>
-                    <input type="text" id="rl-ministrador" value="${rl.ministrador || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-ministrador" class="mt-1.5 min-h-[15px]"></div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Cidadão</label>
-                    <input type="text" id="rl-cidadao" value="${rl.cidadao || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                    <div id="name-rl-cidadao" class="mt-1.5 min-h-[15px]"></div>
+
+                  <div class="border-t border-[var(--border-subtle)] pt-4">
+                    <h4 class="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-wider">Cargos Exclusivos PMESP</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Geral</label>
+                        <input type="text" id="pmesp-rl-geral" value="${pmRl.geral || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-geral" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Comando</label>
+                        <input type="text" id="pmesp-rl-comando" value="${pmRl.comando || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-comando" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Staff Tickets</label>
+                        <input type="text" id="pmesp-rl-staff" value="${pmRl.staff || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-staff" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Recruta</label>
+                        <input type="text" id="pmesp-rl-recruta" value="${pmRl.recruta || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-recruta" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Pré-Aprovado</label>
+                        <input type="text" id="pmesp-rl-preAprovado" value="${pmRl.preAprovado || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-preAprovado" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV Verbal</label>
+                        <input type="text" id="pmesp-rl-advVerbal" value="${pmRl.advVerbal || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-advVerbal" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV 1</label>
+                        <input type="text" id="pmesp-rl-adv1" value="${pmRl.adv1 || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-adv1" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV 2</label>
+                        <input type="text" id="pmesp-rl-adv2" value="${pmRl.adv2 || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-adv2" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV 3</label>
+                        <input type="text" id="pmesp-rl-adv3" value="${pmRl.adv3 || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-adv3" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Administrativo</label>
+                        <input type="text" id="pmesp-rl-administrativo" value="${pmRl.administrativo || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-administrativo" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Ministrador</label>
+                        <input type="text" id="pmesp-rl-ministrador" value="${pmRl.ministrador || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-ministrador" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Cabo PMESP</label>
+                        <input type="text" id="pmesp-rl-caboRole" value="${rl.caboRole || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pmesp-rl-caboRole" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
+              <!-- CONFIGURAÇÕES PCESP -->
+              <div class="card-premium rounded-2xl p-6 border-l-4 border-red-500/50">
+                <h3 class="font-bold text-base text-zinc-100 border-b border-[var(--border-subtle)] pb-3 mb-4 flex items-center gap-2">
+                  <i class="fas fa-id-badge text-red-500"></i> Configurações PCESP (Polícia Civil)
+                </h3>
+                <div class="space-y-6">
+                  <div>
+                    <h4 class="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-wider">Canais Exclusivos PCESP</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel de Tickets</label>
+                        <input type="text" id="pcesp-ch-ticketsPanel" value="${pcCh.ticketsPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-ch-ticketsPanel" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Categoria de Tickets</label>
+                        <input type="text" id="pcesp-ch-ticketsCategory" value="${pcCh.ticketsCategory || ''}" placeholder="ID da categoria" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-ch-ticketsCategory" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Painel Advertências</label>
+                        <input type="text" id="pcesp-ch-warningPanel" value="${pcCh.warningPanel || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-ch-warningPanel" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ponto</label>
+                        <input type="text" id="pcesp-ch-pontoLogsPcesp" value="${pcCh.pontoLogsPcesp || pcCh.pontoLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-ch-pontoLogsPcesp" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Logs de Ausência</label>
+                        <input type="text" id="pcesp-ch-ausenciaLogsPcesp" value="${pcCh.ausenciaLogsPcesp || pcCh.ausenciaLogs || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-ch-ausenciaLogsPcesp" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Edital Avaliação</label>
+                        <input type="text" id="pcesp-ch-editalAvaliacaoPcesp" value="${pcCh.editalAvaliacaoPcesp || pcCh.editalAvaliacao || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-ch-editalAvaliacaoPcesp" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Edital Resultados</label>
+                        <input type="text" id="pcesp-ch-editalResultadosPcesp" value="${pcCh.editalResultadosPcesp || pcCh.editalResultados || ''}" placeholder="ID do canal" class="discord-channel-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-ch-editalResultadosPcesp" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="border-t border-[var(--border-subtle)] pt-4">
+                    <h4 class="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-wider">Cargos Exclusivos PCESP</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Geral</label>
+                        <input type="text" id="pcesp-rl-geral" value="${pcRl.geral || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-geral" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Comando</label>
+                        <input type="text" id="pcesp-rl-comando" value="${pcRl.comando || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-comando" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Staff Tickets</label>
+                        <input type="text" id="pcesp-rl-staff" value="${pcRl.staff || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-staff" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Recruta</label>
+                        <input type="text" id="pcesp-rl-recruta" value="${pcRl.recruta || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-recruta" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Pré-Aprovado</label>
+                        <input type="text" id="pcesp-rl-preAprovado" value="${pcRl.preAprovado || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-preAprovado" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV Verbal</label>
+                        <input type="text" id="pcesp-rl-advVerbal" value="${pcRl.advVerbal || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-advVerbal" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV 1</label>
+                        <input type="text" id="pcesp-rl-adv1" value="${pcRl.adv1 || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-adv1" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV 2</label>
+                        <input type="text" id="pcesp-rl-adv2" value="${pcRl.adv2 || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-adv2" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo ADV 3</label>
+                        <input type="text" id="pcesp-rl-adv3" value="${pcRl.adv3 || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-adv3" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Administrativo</label>
+                        <input type="text" id="pcesp-rl-administrativo" value="${pcRl.administrativo || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-administrativo" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Cargo Ministrador</label>
+                        <input type="text" id="pcesp-rl-ministrador" value="${pcRl.ministrador || ''}" placeholder="ID do cargo" class="discord-role-input w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
+                        <div id="name-pcesp-rl-ministrador" class="mt-1.5 min-h-[15px]"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BOTÃO SALVAR -->
               <div class="flex justify-end gap-3 card-premium rounded-2xl p-4">
                 <button type="submit" id="save-settings-btn" class="bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-lg shadow-brand-500/10 active:scale-98">Salvar Configurações</button>
               </div>

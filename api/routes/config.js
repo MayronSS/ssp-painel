@@ -1,9 +1,22 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const GuildConfig = require('../../models/GuildConfig');
 const { requireAdmin } = require('../middlewares/auth');
 const { discordAPIRequest } = require('../utils/discord');
 const { registrarAuditLog } = require('../utils/helpers');
+
+// Definir o model Corporation caso não esteja registrado
+const Corporation = mongoose.models.Corporation || mongoose.model('Corporation', new mongoose.Schema({
+    guildId: String,
+    slug: String,
+    name: String,
+    shortName: String,
+    type: String,
+    roles: mongoose.Schema.Types.Mixed,
+    channels: mongoose.Schema.Types.Mixed,
+    active: Boolean
+}, { strict: false }));
 
 // Obter configurações do bot (com fallback para variáveis de ambiente)
 router.get('/config', async (req, res) => {
@@ -93,7 +106,16 @@ router.get('/config', async (req, res) => {
             }
         }
 
-        res.json({ success: true, config: configObj });
+        // Buscar dados das corporações primárias
+        const pmesp = await Corporation.findOne({ guildId, slug: 'pmesp' });
+        const pcesp = await Corporation.findOne({ guildId, slug: 'pcesp' });
+
+        res.json({ 
+            success: true, 
+            config: configObj,
+            pmesp: pmesp ? (pmesp.toObject ? pmesp.toObject() : pmesp) : null,
+            pcesp: pcesp ? (pcesp.toObject ? pcesp.toObject() : pcesp) : null
+        });
     } catch (error) {
         console.error("Erro em /api/config:", error);
         res.status(500).json({ success: false, message: 'Erro ao carregar configurações.' });
@@ -141,7 +163,7 @@ router.get('/discord/roles/:roleId', async (req, res) => {
 router.post('/config', requireAdmin, async (req, res) => {
     try {
         const guildId = process.env.GUILD_ID;
-        const { channels, roles, modules, embeds } = req.body;
+        const { channels, roles, modules, embeds, pmesp, pcesp } = req.body;
 
         let existingConfig = await GuildConfig.findOne({ guildId });
         if (!existingConfig) {
@@ -185,6 +207,97 @@ router.post('/config', requireAdmin, async (req, res) => {
             }
         }
 
+        // Atualizar corporações pmesp e pcesp se fornecidas
+        if (pmesp && typeof pmesp === 'object') {
+            let pmespDoc = await Corporation.findOne({ guildId, slug: 'pmesp' });
+            if (pmespDoc) {
+                if (!pmespDoc.roles) pmespDoc.roles = {};
+                if (!pmespDoc.channels) pmespDoc.channels = {};
+                
+                if (pmesp.roles && typeof pmesp.roles === 'object') {
+                    for (const [key, val] of Object.entries(pmesp.roles)) {
+                        pmespDoc.roles[key] = val;
+                        // Sincronizar compatibilidade legada com GuildConfig.roles
+                        const legacyRoleMapping = {
+                            geral: 'lspdGeral',
+                            comando: 'comandoAdmin',
+                            staff: 'ticketStaff',
+                            recruta: 'recrutaCadete',
+                            preAprovado: 'preAprovado',
+                            advVerbal: 'advVerbal',
+                            adv1: 'adv1',
+                            adv2: 'adv2',
+                            adv3: 'adv3',
+                            administrativo: 'administrativo',
+                            ministrador: 'ministrador'
+                        };
+                        if (legacyRoleMapping[key]) {
+                            existingConfig.roles[legacyRoleMapping[key]] = val;
+                        }
+                        if (key === 'geral') {
+                            existingConfig.roles.policial = val;
+                        }
+                        if (key === 'caboRole') {
+                            existingConfig.roles.caboRole = val;
+                        }
+                    }
+                }
+                if (pmesp.channels && typeof pmesp.channels === 'object') {
+                    for (const [key, val] of Object.entries(pmesp.channels)) {
+                        pmespDoc.channels[key] = val;
+                        // Sincronizar compatibilidade legada com GuildConfig.channels
+                        const legacyChanMapping = {
+                            ticketsPanel: 'ticketsPanel',
+                            ticketsCategory: 'ticketsCategory',
+                            warningPanel: 'warningPanel',
+                            pontoLogsPmesp: 'pontoLogsPmesp',
+                            ausenciaLogsPmesp: 'ausenciaLogsPmesp',
+                            editalAvaliacaoPmesp: 'editalAvaliacaoPmesp',
+                            editalResultadosPmesp: 'editalResultadosPmesp'
+                        };
+                        if (legacyChanMapping[key]) {
+                            existingConfig.channels[legacyChanMapping[key]] = val;
+                        }
+                    }
+                }
+                pmespDoc.markModified('roles');
+                pmespDoc.markModified('channels');
+                await pmespDoc.save();
+            }
+        }
+
+        if (pcesp && typeof pcesp === 'object') {
+            let pcespDoc = await Corporation.findOne({ guildId, slug: 'pcesp' });
+            if (pcespDoc) {
+                if (!pcespDoc.roles) pcespDoc.roles = {};
+                if (!pcespDoc.channels) pcespDoc.channels = {};
+                
+                if (pcesp.roles && typeof pcesp.roles === 'object') {
+                    for (const [key, val] of Object.entries(pcesp.roles)) {
+                        pcespDoc.roles[key] = val;
+                    }
+                }
+                if (pcesp.channels && typeof pcesp.channels === 'object') {
+                    for (const [key, val] of Object.entries(pcesp.channels)) {
+                        pcespDoc.channels[key] = val;
+                        // Sincronizar compatibilidade legada com GuildConfig.channels
+                        const legacyChanMapping = {
+                            pontoLogsPcesp: 'pontoLogsPcesp',
+                            ausenciaLogsPcesp: 'ausenciaLogsPcesp',
+                            editalAvaliacaoPcesp: 'editalAvaliacaoPcesp',
+                            editalResultadosPcesp: 'editalResultadosPcesp'
+                        };
+                        if (legacyChanMapping[key]) {
+                            existingConfig.channels[legacyChanMapping[key]] = val;
+                        }
+                    }
+                }
+                pcespDoc.markModified('roles');
+                pcespDoc.markModified('channels');
+                await pcespDoc.save();
+            }
+        }
+
         // Marcar caminhos como modificados no Mongoose para garantir que gravem
         existingConfig.markModified('channels');
         existingConfig.markModified('roles');
@@ -195,8 +308,8 @@ router.post('/config', requireAdmin, async (req, res) => {
 
         await registrarAuditLog(
             'config_alterada',
-            'Configurações do Bot Atualizadas',
-            `As configurações do bot foram modificadas via Painel por ${req.session.user.displayName}.`,
+            'Configurações do Bot Sincronizadas',
+            `As configurações do bot e corporações foram modificadas via Painel por ${req.session.user.displayName}.`,
             req.session.user.id,
             req.session.user.username
         );
