@@ -3,7 +3,7 @@ const path = require('path');
 const handler = require('./api/index.js');
 
 const server = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // API routes are forwarded to Vercel handler
 server.all('/api/*', (req, res) => {
@@ -18,9 +18,9 @@ server.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n==================================================`);
   console.log(` Painel LSPD iniciado com sucesso!`);
-  console.log(` Acesse em: http://localhost:${PORT}`);
+  console.log(` Acesse em: http://0.0.0.0:${PORT}`);
   console.log(`==================================================\n`);
 });
