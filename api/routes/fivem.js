@@ -12,8 +12,13 @@ const Ponto = require('../../models/Ponto');
 // Configurações
 const API_KEY = process.env.PONTO_API_KEY || 'TROCAR_POR_TOKEN_SEGURO_DO_BATE_PONTO';
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
-const CHANNEL_PONTO_LOGS = process.env.CHANNEL_PONTO_LOGS;
 const CHANNEL_PONTO_PANEL = process.env.CHANNEL_PONTO_PANEL;
+
+// Canais de log por corporação
+const LOG_CHANNELS = {
+  pmesp: process.env.CHANNEL_PONTO_LOGS_PMESP || '1510831185432150136',
+  pcesp: process.env.CHANNEL_PONTO_LOGS_PCESP || '1510831189903147171',
+};
 
 // ==========================================
 // Discord REST API Helper
@@ -283,8 +288,9 @@ router.post('/fivem/duty', async (req, res) => {
       setImmediate(async () => {
         try {
           // Log de entrada
-          if (CHANNEL_PONTO_LOGS) {
-            await sendDiscordMessage(CHANNEL_PONTO_LOGS, buildLogEmbed({
+          const logChannel = LOG_CHANNELS[corporationSlug] || LOG_CHANNELS.pmesp;
+          if (logChannel) {
+            await sendDiscordMessage(logChannel, buildLogEmbed({
               type: 'entrada', userId: discord, username: name, ponto: pontoCriado
             }));
           }
@@ -319,8 +325,9 @@ router.post('/fivem/duty', async (req, res) => {
       setImmediate(async () => {
         try {
           // Log de saída
-          if (CHANNEL_PONTO_LOGS) {
-            await sendDiscordMessage(CHANNEL_PONTO_LOGS, buildLogEmbed({
+          const logChannel = LOG_CHANNELS[corporationSlug] || LOG_CHANNELS.pmesp;
+          if (logChannel) {
+            await sendDiscordMessage(logChannel, buildLogEmbed({
               type: 'saida', userId: discord, username: name, ponto: ativo, durationMs
             }));
           }
