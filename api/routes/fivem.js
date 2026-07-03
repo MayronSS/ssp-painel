@@ -242,7 +242,8 @@ router.post('/fivem/duty', async (req, res) => {
     }
 
     // 2. Validar payload
-    const { discord, action, job, name } = req.body;
+    const { discord: rawDiscord, action, job, name } = req.body;
+    const discord = rawDiscord ? String(rawDiscord).replace(/\D/g, '') : null;
 
     if (action !== 'punch_out_all' && (!discord || !action || !job || !name)) {
       return res.status(400).json({
