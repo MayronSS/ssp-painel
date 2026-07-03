@@ -2253,28 +2253,6 @@ class PfPanelApp {
           ${this.templates.summaryCard('Transcripts Salvos', summary.totalTranscripts, 'fa-file-invoice', 'indigo')}
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div class="xl:col-span-2 card-premium rounded-2xl p-6">
-            <div class="mb-4">
-              <h3 class="font-bold text-base">Solicitações Recentes (Últimos 7 dias)</h3>
-              <p class="text-xs text-[var(--text-muted)] mt-1">Estatísticas consolidadas de formulários submetidos.</p>
-            </div>
-            <div class="h-80">
-              <canvas id="activity-chart"></canvas>
-            </div>
-          </div>
-
-          <div class="card-premium rounded-2xl p-6 flex flex-col">
-            <div class="mb-4">
-              <h3 class="font-bold text-base">Distribuição de Serviços</h3>
-              <p class="text-xs text-[var(--text-muted)] mt-1">Proporção dos tipos de serviço demandados.</p>
-            </div>
-            <div class="h-60 relative flex items-center justify-center">
-              <canvas id="distribution-chart"></canvas>
-            </div>
-          </div>
-        </div>
-
         <div class="mt-6 card-premium rounded-2xl p-6">
           <div class="mb-4">
             <h3 class="font-bold text-base">Registro de Atividades Recentes</h3>
