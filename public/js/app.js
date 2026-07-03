@@ -62,36 +62,18 @@ class PfPanelApp {
 
     const titles = {
       dashboard: 'Visão Geral',
-      cidadaos: 'Dossiê de Cidadãos',
-      solicitacoes: 'Mesa de Análise',
       ponto: 'Controle de Ponto',
-      tickets: 'Controle de Tickets',
-      transcripts: 'Transcripts de Atendimento',
-      logs: 'Auditoria de Sistema',
-      reports: 'Emissão de Relatórios',
-      settings: 'Configurações do Bot',
-      ausencias: 'Gerenciamento de Ausências',
-      warnings: 'Advertências Disciplinares',
-      officers: 'Dossiê de Oficiais',
       ranking: 'Ranking de Atividade',
-      academia: 'Academia SSP'
+      tickets: 'Controle de Tickets',
+      transcripts: 'Transcripts de Atendimento'
     };
 
     const subtitles = {
-      dashboard: 'Indicadores consolidados do módulo de cadastro e solicitações da SSP.',
-      cidadaos: 'Gerenciamento de registros de cidadãos validados e fichados no bot.',
-      solicitacoes: 'Fila de análise operacional de visto, porte de arma e recrutamento.',
+      dashboard: 'Indicadores consolidados de tickets, bate-ponto e atendimentos da SSP.',
       ponto: 'Monitoramento de turnos, oficiais em patrulha e rankings de horas.',
-      tickets: 'Controle total dos atendimentos abertos, fechados, assumidos e vinculados ao Discord.',
-      transcripts: 'Histórico interativo e transcripts completos dos tickets de atendimento encerrados.',
-      logs: 'Registro detalhado de eventos e ações administrativas no bot e no painel.',
-      reports: 'Geração de dados em Excel (XLSX) e relatórios executivos em formato PDF.',
-      settings: 'Parâmetros operacionais do Discord: canais, cargos e design de embeds.',
-      ausencias: 'Fila de pedidos de afastamento temporário e controle de licenças.',
-      warnings: 'Histórico de punições e aplicação direta de advertências aos oficiais.',
-      officers: 'Perfis de carreira, anotações de comando e produtividade dos policiais.',
       ranking: 'Desempenho operacional da corporação por patrulhas e ações.',
-      academia: 'Central de treinamentos, cursos e capacitação dos oficiais da SSP.'
+      tickets: 'Controle total dos atendimentos abertos, fechados, assumidos e vinculados ao Discord.',
+      transcripts: 'Histórico interativo e transcripts completos dos tickets de atendimento encerrados.'
     };
 
     this.root.querySelector('#page-title').textContent = titles[page] || 'Painel SSP';
@@ -109,19 +91,10 @@ class PfPanelApp {
 
     const pageRenderers = {
       dashboard: this.renderDashboardPage,
-      cidadaos: this.renderCidadaosPage,
-      solicitacoes: this.renderSolicitacoesPage,
       ponto: this.renderPontoPage,
-      tickets: this.renderTicketsPage,
-      transcripts: this.renderTranscriptsPage,
-      logs: this.renderLogsPage,
-      reports: this.renderReportsPage,
-      settings: this.renderSettingsPage,
-      ausencias: this.renderAusenciasPage,
-      warnings: this.renderWarningsPage,
-      officers: this.renderOfficersPage,
       ranking: this.renderRankingPage,
-      academia: this.renderAcademiaPage
+      tickets: this.renderTicketsPage,
+      transcripts: this.renderTranscriptsPage
     };
     this.pageRenderers = pageRenderers;
 
@@ -131,7 +104,7 @@ class PfPanelApp {
   }
 
   startLiveRefresh(page) {
-    const livePages = new Set(['dashboard', 'cidadaos', 'solicitacoes', 'ponto', 'tickets', 'transcripts', 'logs', 'ausencias', 'warnings', 'officers', 'ranking', 'academia']);
+    const livePages = new Set(['dashboard', 'ponto', 'ranking', 'tickets', 'transcripts']);
     if (!livePages.has(page)) return;
 
     // Track scroll events on contentContainer to pause refresh on activity
@@ -271,14 +244,9 @@ class PfPanelApp {
     if (silent) {
       // Atualiza os valores dos cards de resumo silenciosamente para evitar flicker
       const cards = {
-        'Cidadãos Fichados': summary.totalCidadaos,
-        'Solicitações Pendentes': summary.solicitacoesPendentes,
-        'Tickets Abertos': summary.ticketsAbertos || 0,
         'Oficiais em Serviço': summary.pontosAbertos || 0,
-        'Transcripts Salvos': summary.totalTranscripts,
-        'Editais Aprovados': summary.editaisAprovados || 0,
-        'Portes Concedidos': summary.portesAprovados,
-        'Vistos Concedidos': summary.passaportesAprovados
+        'Tickets Abertos': summary.ticketsAbertos || 0,
+        'Transcripts Salvos': summary.totalTranscripts
       };
 
       for (const [title, value] of Object.entries(cards)) {
@@ -2146,23 +2114,8 @@ class PfPanelApp {
           <a href="#dashboard" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
             <i class="fas fa-chart-line w-5 mr-3"></i> Visão Geral
           </a>
-          <a href="#cidadaos" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-id-card w-5 mr-3"></i> Ficha de Cidadãos
-          </a>
-          <a href="#solicitacoes" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-gavel w-5 mr-3"></i> Mesa de Análise
-          </a>
           <a href="#ponto" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
             <i class="fas fa-clock w-5 mr-3"></i> Bate-Ponto
-          </a>
-          <a href="#ausencias" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-calendar-times w-5 mr-3"></i> Ausências
-          </a>
-          <a href="#warnings" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-triangle-exclamation w-5 mr-3"></i> Advertências
-          </a>
-          <a href="#officers" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-id-badge w-5 mr-3"></i> Dossiê de Oficiais
           </a>
           <a href="#ranking" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
             <i class="fas fa-trophy w-5 mr-3"></i> Ranking de Atividade
@@ -2170,21 +2123,8 @@ class PfPanelApp {
           <a href="#tickets" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
             <i class="fas fa-headset w-5 mr-3"></i> Tickets
           </a>
-
-          <a href="#academia" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-graduation-cap w-5 mr-3"></i> Academia
-          </a>
           <a href="#transcripts" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
             <i class="fas fa-file-invoice w-5 mr-3"></i> Transcripts
-          </a>
-          <a href="#logs" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-list-check w-5 mr-3"></i> Auditoria
-          </a>
-          <a href="#reports" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-file-pdf w-5 mr-3"></i> Relatórios
-          </a>
-          <a href="#settings" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-sliders w-5 mr-3"></i> Configurações
           </a>
         `;
 
@@ -2308,15 +2248,10 @@ class PfPanelApp {
       `,
 
       dashboardPage: (summary) => `
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-          ${this.templates.summaryCard('Cidadãos Fichados', summary.totalCidadaos, 'fa-users', 'brand')}
-          ${this.templates.summaryCard('Solicitações Pendentes', summary.solicitacoesPendentes, 'fa-gavel', 'amber')}
-          ${this.templates.summaryCard('Tickets Abertos', summary.ticketsAbertos || 0, 'fa-headset', 'brand')}
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
           ${this.templates.summaryCard('Oficiais em Serviço', summary.pontosAbertos || 0, 'fa-user-clock', 'emerald')}
+          ${this.templates.summaryCard('Tickets Abertos', summary.ticketsAbertos || 0, 'fa-headset', 'brand')}
           ${this.templates.summaryCard('Transcripts Salvos', summary.totalTranscripts, 'fa-file-invoice', 'indigo')}
-          ${this.templates.summaryCard('Editais Aprovados', summary.editaisAprovados || 0, 'fa-user-check', 'emerald')}
-          ${this.templates.summaryCard('Portes Concedidos', summary.portesAprovados, 'fa-gun', 'emerald')}
-          ${this.templates.summaryCard('Vistos Concedidos', summary.passaportesAprovados, 'fa-passport', 'violet')}
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
