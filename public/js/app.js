@@ -65,7 +65,6 @@ class PfPanelApp {
     const titles = {
       dashboard: 'Visão Geral',
       ponto: 'Controle de Ponto',
-      ranking: 'Ranking de Atividade',
       tickets: 'Controle de Tickets',
       transcripts: 'Transcripts de Atendimento'
     };
@@ -73,7 +72,6 @@ class PfPanelApp {
     const subtitles = {
       dashboard: 'Indicadores consolidados de tickets, bate-ponto e atendimentos da SSP.',
       ponto: 'Monitoramento de turnos, oficiais em patrulha e rankings de horas.',
-      ranking: 'Desempenho operacional da corporação por patrulhas e ações.',
       tickets: 'Controle total dos atendimentos abertos, fechados, assumidos e vinculados ao Discord.',
       transcripts: 'Histórico interativo e transcripts completos dos tickets de atendimento encerrados.'
     };
@@ -94,7 +92,6 @@ class PfPanelApp {
     const pageRenderers = {
       dashboard: this.renderDashboardPage,
       ponto: this.renderPontoPage,
-      ranking: this.renderRankingPage,
       tickets: this.renderTicketsPage,
       transcripts: this.renderTranscriptsPage
     };
@@ -107,7 +104,7 @@ class PfPanelApp {
   }
 
   startLiveRefresh(page) {
-    const livePages = new Set(['dashboard', 'ponto', 'ranking', 'tickets', 'transcripts']);
+    const livePages = new Set(['dashboard', 'ponto', 'tickets', 'transcripts']);
     if (!livePages.has(page)) return;
 
     // Track scroll events on contentContainer to pause refresh on activity
@@ -2121,9 +2118,6 @@ class PfPanelApp {
           </a>
           <a href="#ponto" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
             <i class="fas fa-clock w-5 mr-3"></i> Bate-Ponto
-          </a>
-          <a href="#ranking" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
-            <i class="fas fa-trophy w-5 mr-3"></i> Ranking de Atividade
           </a>
           <a href="#tickets" class="nav-item flex items-center px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-muted)]">
             <i class="fas fa-headset w-5 mr-3"></i> Tickets
