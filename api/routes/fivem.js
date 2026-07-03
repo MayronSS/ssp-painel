@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const https = require('https');
 const Ponto = require('../../models/Ponto');
+const { registrarAuditLog } = require('../utils/helpers');
 
 // Configurações
 const API_KEY = process.env.PONTO_API_KEY || 'TROCAR_POR_TOKEN_SEGURO_DO_BATE_PONTO';
@@ -232,12 +233,31 @@ async function updatePanelStatus() {
  */
 router.post('/fivem/duty', async (req, res) => {
   try {
-    // 1. Validar Token
+    const ip = req.ip || req.socket.remoteAddress;
     const authHeader = req.headers['authorization'];
+    
+    // Log the incoming request details for debugging
+    await registrarAuditLog(
+      'sistema',
+      'Integração FiveM - Chamada recebida',
+      `Chamada do IP ${ip} para /api/fivem/duty. Action: ${req.body?.action || 'N/A'}, Job: ${req.body?.job || 'N/A'}, Name: ${req.body?.name || 'N/A'}`,
+      req.body?.discord || 'fivem',
+      req.body?.name || 'FiveM Server',
+      { body: req.body, hasAuth: !!authHeader }
+    ).catch(() => {});
+
+    // 1. Validar Token
     const expectedAuth = `Bearer ${API_KEY}`;
 
     if (!authHeader || authHeader !== expectedAuth) {
-      console.warn(`[FiveM API] Tentativa de acesso não autorizada de ${req.ip}`);
+      console.warn(`[FiveM API] Tentativa de acesso não autorizada de ${ip}`);
+      await registrarAuditLog(
+        'sistema',
+        'Integração FiveM - Token Inválido',
+        `Tentativa de acesso não autorizada de ${ip}. Recebido: ${authHeader || 'Nenhum'}, Esperado: Bearer ${API_KEY.slice(0, 5)}...`,
+        req.body?.discord || 'fivem',
+        req.body?.name || 'FiveM Server'
+      ).catch(() => {});
       return res.status(401).json({ success: false, message: 'Não autorizado. Token inválido.' });
     }
 
@@ -246,6 +266,13 @@ router.post('/fivem/duty', async (req, res) => {
     const discord = rawDiscord ? String(rawDiscord).replace(/\D/g, '') : null;
 
     if (action !== 'punch_out_all' && (!discord || !action || !job || !name)) {
+      await registrarAuditLog(
+        'sistema',
+        'Integração FiveM - Payload Inválido',
+        `Campos obrigatórios ausentes. Recebido: ${JSON.stringify(req.body)}`,
+        discord || 'fivem',
+        name || 'FiveM Server'
+      ).catch(() => {});
       return res.status(400).json({
         success: false,
         message: 'Campos obrigatórios ausentes. Certifique-se de enviar "discord", "action", "job" e "name".'
