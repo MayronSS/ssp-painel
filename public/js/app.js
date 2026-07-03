@@ -4424,7 +4424,6 @@ class PfPanelApp {
                   <div class="flex flex-wrap gap-1 mt-2 justify-center sm:justify-start">
                     <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">${o.shiftsCount} Turnos</span>
                     <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${o.totalHours} Horas</span>
-                    ${o.warnings.length > 0 ? `<span class="text-[9px] font-bold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">${o.warnings.length} Advertências</span>` : ''}
                   </div>
                 </div>
               </div>
@@ -4433,8 +4432,6 @@ class PfPanelApp {
               <div class="flex border-b border-[var(--border-subtle)] bg-[var(--card-bg-soft)]/20 px-6 overflow-x-auto no-scrollbar">
                 <button data-tab="general" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-brand-500 text-brand-500 active">Resumo</button>
                 <button data-tab="shifts" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-transparent text-[var(--text-muted)] hover:text-zinc-200">Plantões</button>
-                <button data-tab="penal" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-transparent text-[var(--text-muted)] hover:text-zinc-200">Prontuário</button>
-                <button data-tab="leaves" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-transparent text-[var(--text-muted)] hover:text-zinc-200">Ausências</button>
                 <button data-tab="notes" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-transparent text-[var(--text-muted)] hover:text-zinc-200">Observações</button>
                 ${user.isAdmin ? `<button data-tab="admin" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-transparent text-rose-400 hover:text-rose-300">Administração</button>` : ''}
               </div>
@@ -4444,39 +4441,22 @@ class PfPanelApp {
                 
                 <!-- Geral Tab -->
                 <div id="tab-content-general" class="profile-tab-content space-y-4">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="grid grid-cols-2 gap-3">
-                      <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
-                        <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Ações Policiais</p>
-                        <p class="text-2xl font-black text-brand-400 mt-0.5">${o.acoes}</p>
-                      </div>
-                      <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
-                        <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Apreensões</p>
-                        <p class="text-2xl font-black text-brand-400 mt-0.5">${o.apreensoes}</p>
-                      </div>
-                      <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
-                        <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Avaliações Feitas</p>
-                        <p class="text-2xl font-black text-brand-400 mt-0.5">${o.avaliacoesRealizadas}</p>
-                      </div>
-                      <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
-                        <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Avaliações Recebidas</p>
-                        <p class="text-2xl font-black text-brand-400 mt-0.5">${o.avaliacoesRecebidas}</p>
-                      </div>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
+                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Ações Policiais</p>
+                      <p class="text-2xl font-black text-brand-400 mt-0.5">${o.acoes}</p>
                     </div>
-
-                    <!-- Ficha de Recrutamento -->
-                    <div class="p-4 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-left text-xs space-y-2">
-                      <p class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-bold border-b border-[var(--border-subtle)] pb-1 mb-1.5"><i class="fas fa-file-signature text-brand-400 mr-1.5"></i>Recrutamento SSP</p>
-                      ${o.recruitment ? `
-                        <div class="space-y-1">
-                          <div class="flex justify-between"><span class="text-[var(--text-muted)] font-semibold">Submissão:</span> <span class="font-bold text-zinc-200">${formatDateTime(o.recruitment.createdAt)}</span></div>
-                          <div class="flex justify-between"><span class="text-[var(--text-muted)] font-semibold">Decisão:</span> <span class="font-bold text-zinc-200">${formatDateTime(o.recruitment.updatedAt)}</span></div>
-                          <div class="flex justify-between"><span class="text-[var(--text-muted)] font-semibold">Autor:</span> <span class="font-bold text-zinc-200">@${o.recruitment.aprovadoPor || o.recruitment.reprovadoPor || 'Comando'}</span></div>
-                          <div class="flex justify-between items-center"><span class="text-[var(--text-muted)] font-semibold">Status:</span> <span class="uppercase text-[9px] px-1.5 py-0.5 rounded font-extrabold ${o.recruitment.status === 'aprovado' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">${o.recruitment.status}</span></div>
-                        </div>
-                      ` : `
-                        <p class="text-[11px] text-[var(--text-muted)] italic py-2">Nenhum formulário de recrutamento encontrado no sistema.</p>
-                      `}
+                    <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
+                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Apreensões</p>
+                      <p class="text-2xl font-black text-brand-400 mt-0.5">${o.apreensoes}</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
+                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Avaliações Feitas</p>
+                      <p class="text-2xl font-black text-brand-400 mt-0.5">${o.avaliacoesRealizadas}</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
+                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Avaliações Recebidas</p>
+                      <p class="text-2xl font-black text-brand-400 mt-0.5">${o.avaliacoesRecebidas}</p>
                     </div>
                   </div>
                 </div>
@@ -4525,67 +4505,6 @@ class PfPanelApp {
                               <i class="fas fa-history text-2xl mb-2 block opacity-30"></i>
                               Nenhum turno finalizado registrado ${this.state.lastProfileFiltered ? 'neste período' : ''}.
                             </td>
-                          </tr>
-                        `}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <!-- Penal Tab -->
-                <div id="tab-content-penal" class="profile-tab-content hidden space-y-4">
-                  ${o.warnings.length > 0 ? o.warnings.map(w => {
-                    const statusClass = w.status === 'ativo' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
-                    return `
-                      <div class="p-4 border border-[var(--border-subtle)] bg-zinc-950/10 rounded-xl relative">
-                        <span class="absolute top-4 right-4 text-[9px] font-bold px-2 py-0.5 rounded border uppercase ${statusClass}">
-                          ${w.status}
-                        </span>
-                        <h4 class="font-bold text-xs text-zinc-200">Protocolo: ${w.caseNumber || 'N/A'}</h4>
-                        <p class="text-[10px] text-[var(--text-muted)] mt-1">Punição: <strong class="text-zinc-300">${w.penalty}</strong></p>
-                        <p class="text-xs text-zinc-300 mt-2 italic">"${w.reason}"</p>
-                        <p class="text-[9px] text-[var(--text-muted)] mt-3">Aplicado em: ${formatDateTime(w.createdAt)} • Validade: ${w.expiryDate ? formatDateTime(w.expiryDate) : 'Permanente'}</p>
-                      </div>
-                    `;
-                  }).join('') : `
-                    <div class="p-8 text-center text-[var(--text-muted)] card-premium rounded-xl border border-[var(--border-subtle)]/40">
-                      <i class="fas fa-shield text-3xl text-emerald-500 mb-2"></i>
-                      <p class="text-sm font-semibold">Oficial com ficha limpa!</p>
-                      <p class="text-xs">Nenhuma advertência disciplinar ativa ou arquivada.</p>
-                    </div>
-                  `}
-                </div>
-
-                <!-- Ausências Tab -->
-                <div id="tab-content-leaves" class="profile-tab-content hidden space-y-4">
-                  <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr class="border-b border-[var(--border-subtle)] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
-                          <th class="py-2.5">Período</th>
-                          <th class="py-2.5">Motivo</th>
-                          <th class="py-2.5 text-center">Dias</th>
-                          <th class="py-2.5 text-right">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody class="divide-y divide-[var(--border-subtle)]/30 text-zinc-300">
-                        ${o.ausencias && o.ausencias.length > 0 ? o.ausencias.map(a => {
-                          const statusBadge = a.status === 'aprovado'
-                            ? `<span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Aprovada</span>`
-                            : a.status === 'reprovado'
-                            ? `<span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded border bg-rose-500/10 text-rose-400 border-rose-500/20">Reprovada</span>`
-                            : `<span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded border bg-amber-500/10 text-amber-400 border-amber-500/20">Pendente</span>`;
-                          return `
-                            <tr>
-                              <td class="py-2.5 font-semibold">${a.dataInicio} até ${a.dataFim}</td>
-                              <td class="py-2.5 max-w-[200px] truncate" title="${a.motivo}">${a.motivo}</td>
-                              <td class="py-2.5 text-center font-bold text-zinc-300">${a.duracaoDias} dias</td>
-                              <td class="py-2.5 text-right">${statusBadge}</td>
-                            </tr>
-                          `;
-                        }).join('') : `
-                          <tr>
-                            <td colspan="4" class="py-8 text-center text-[var(--text-muted)]">Nenhum pedido de ausência/licença registrado.</td>
                           </tr>
                         `}
                       </tbody>
