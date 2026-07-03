@@ -53,6 +53,8 @@ class PfPanelApp {
 
   async navigateTo(page) {
     this.clearTimers();
+    this._navId = (this._navId || 0) + 1;
+    const myNavId = this._navId;
 
     const contentContainer = this.root.querySelector('#page-content');
     if (!contentContainer) return;
@@ -100,6 +102,7 @@ class PfPanelApp {
 
     const renderer = pageRenderers[page] || this.renderNotFoundPage;
     await renderer.call(this, contentContainer);
+    if (this._navId !== myNavId) return;
     this.startLiveRefresh(page);
   }
 
@@ -117,9 +120,11 @@ class PfPanelApp {
       }, { passive: true });
     }
 
+    const currentNavId = this._navId;
     this.state.timers.liveRefresh = setInterval(async () => {
       if (document.hidden) return;
       if (this.state.currentPage !== page) return;
+      if (this._navId !== currentNavId) return;
       if (this.modalRoot.innerHTML.trim()) return;
 
       const currentContainer = this.root.querySelector('#page-content');
@@ -4792,18 +4797,6 @@ class PfPanelApp {
 
         return `
           <div class="space-y-6">
-            <div class="card-premium rounded-2xl p-2 bg-[var(--card-bg-soft)]/50 border border-[var(--border-subtle)] flex gap-2">
-              <button data-board="hours" class="ranking-tab-btn flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all border border-transparent text-brand-500 bg-brand-500/10 border-brand-500/20 active flex items-center justify-center gap-2">
-                <i class="fas fa-clock"></i> Horas de Patrulha
-              </button>
-              <button data-board="actions" class="ranking-tab-btn flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all border border-transparent text-[var(--text-muted)] hover:text-zinc-200 flex items-center justify-center gap-2">
-                <i class="fas fa-shield"></i> Ações Policiais
-              </button>
-              <button data-board="seizures" class="ranking-tab-btn flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all border border-transparent text-[var(--text-muted)] hover:text-zinc-200 flex items-center justify-center gap-2">
-                <i class="fas fa-gun"></i> Apreensões
-              </button>
-            </div>
-
             <div id="board-hours" class="ranking-board card-premium rounded-2xl p-6 bg-[var(--card-bg-soft)]/20">
               <div class="border-b border-[var(--border-subtle)] pb-3 mb-4 flex justify-between items-center">
                 <h4 class="font-extrabold text-sm text-zinc-200 uppercase tracking-wider">Top 15 - Horas Trabalhadas</h4>
@@ -4812,25 +4805,6 @@ class PfPanelApp {
               ${renderPodium(rHours, 'h')}
               ${renderTableList(rHours, 'h')}
             </div>
-
-            <div id="board-actions" class="ranking-board card-premium rounded-2xl p-6 bg-[var(--card-bg-soft)]/20 hidden">
-              <div class="border-b border-[var(--border-subtle)] pb-3 mb-4 flex justify-between items-center">
-                <h4 class="font-extrabold text-sm text-zinc-200 uppercase tracking-wider">Top 15 - Produtividade de Ações</h4>
-                <span class="text-[10px] text-[var(--text-muted)] font-semibold">Atualizado dinamicamente</span>
-              </div>
-              ${renderPodium(rAcoes, ' ac.')}
-              ${renderTableList(rAcoes, ' ac.')}
-            </div>
-
-            <div id="board-seizures" class="ranking-board card-premium rounded-2xl p-6 bg-[var(--card-bg-soft)]/20 hidden">
-              <div class="border-b border-[var(--border-subtle)] pb-3 mb-4 flex justify-between items-center">
-                <h4 class="font-extrabold text-sm text-zinc-200 uppercase tracking-wider">Top 15 - Apreensões de Materiais</h4>
-                <span class="text-[10px] text-[var(--text-muted)] font-semibold">Atualizado dinamicamente</span>
-              </div>
-              ${renderPodium(rApreensoes, ' ap.')}
-              ${renderTableList(rApreensoes, ' ap.')}
-            </div>
-
           </div>
         `;
       },
