@@ -104,7 +104,7 @@ class PfPanelApp {
   }
 
   startLiveRefresh(page) {
-    const livePages = new Set(['dashboard', 'ponto', 'tickets', 'transcripts']);
+    const livePages = new Set(['dashboard', 'ponto', 'tickets']);
     if (!livePages.has(page)) return;
 
     // Track scroll events on contentContainer to pause refresh on activity
@@ -121,11 +121,16 @@ class PfPanelApp {
     }
 
     const currentNavId = this._navId;
+    const interval = page === 'ponto' ? 15000 : 4000;
+
     this.state.timers.liveRefresh = setInterval(async () => {
       if (document.hidden) return;
       if (this.state.currentPage !== page) return;
       if (this._navId !== currentNavId) return;
       if (this.modalRoot.innerHTML.trim()) return;
+
+      // Skip refresh completely if on ponto page and viewing the officers list/dossiers tab
+      if (page === 'ponto' && this.state.pontoActiveTab === 'officers') return;
 
       const currentContainer = this.root.querySelector('#page-content');
       if (!currentContainer) return;
@@ -160,7 +165,7 @@ class PfPanelApp {
       setTimeout(() => {
         if (currentContainer) currentContainer.scrollTop = scrollTop;
       }, 300);
-    }, 4000);
+    }, interval);
   }
 
   setupCommonListeners() {
