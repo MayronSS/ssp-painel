@@ -68,6 +68,7 @@ async function broadcast(type, title, message, options = {}) {
 /**
  * Get notifications for a user (paginated).
  * Returns both personal (userId) and broadcast ("*") notifications.
+ * Adds a virtual 'read' field based on readBy array.
  */
 async function getForUser(userId, page = 1, limit = 20) {
   const skip = (page - 1) * limit;
@@ -75,8 +76,12 @@ async function getForUser(userId, page = 1, limit = 20) {
   const [notifications, total, unreadCount] = await Promise.all([
     Notification.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     Notification.countDocuments(query),
-    Notification.countDocuments({ ...query, read: false })
+    Notification.countDocuments({ ...query, readBy: { $ne: userId } })
   ]);
+  // Add virtual 'read' per-user
+  notifications.forEach(n => {
+    n.read = (n.readBy || []).includes(userId);
+  });
   return {
     notifications,
     total,
@@ -90,17 +95,16 @@ async function getForUser(userId, page = 1, limit = 20) {
  * Get unread count for a user (includes broadcasts).
  */
 async function getUnreadCount(userId) {
-  return Notification.countDocuments({ userId: { $in: [userId, '*'] }, read: false });
+  return Notification.countDocuments({ userId: { $in: [userId, '*'] }, readBy: { $ne: userId } });
 }
 
 /**
- * Mark a notification as read.
+ * Mark a notification as read for a specific user.
  */
 async function markRead(notificationId, userId) {
-  // For broadcast notifications, we mark them read per-user by userId match or wildcard
   return Notification.updateOne(
     { _id: notificationId, userId: { $in: [userId, '*'] } },
-    { read: true }
+    { $addToSet: { readBy: userId } }
   );
 }
 
@@ -109,8 +113,8 @@ async function markRead(notificationId, userId) {
  */
 async function markAllRead(userId) {
   return Notification.updateMany(
-    { userId: { $in: [userId, '*'] }, read: false },
-    { read: true }
+    { userId: { $in: [userId, '*'] }, readBy: { $ne: userId } },
+    { $addToSet: { readBy: userId } }
   );
 }
 

@@ -45,6 +45,10 @@ const notificationSchema = new mongoose.Schema({
     default: false,
     index: true
   },
+  readBy: {
+    type: [String],
+    default: []
+  },
   details: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
