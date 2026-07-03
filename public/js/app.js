@@ -1714,39 +1714,7 @@ class PfPanelApp {
         }
       });
 
-      const countersForm = this.modalRoot.querySelector('#edit-counters-form');
-      countersForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const acoes = parseInt(this.modalRoot.querySelector('#cnt-acoes').value) || 0;
-        const apreensoes = parseInt(this.modalRoot.querySelector('#cnt-apreensoes').value) || 0;
-        const avaliacoesRealizadas = parseInt(this.modalRoot.querySelector('#cnt-avaliacoesRealizadas').value) || 0;
-        const avaliacoesRecebidas = parseInt(this.modalRoot.querySelector('#cnt-avaliacoesRecebidas').value) || 0;
 
-        const submitBtn = countersForm.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...';
-
-        try {
-          const putRes = await this.api.fetch(`/officers/${userId}/counters`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ acoes, apreensoes, avaliacoesRealizadas, avaliacoesRecebidas })
-          });
-
-          if (putRes.success) {
-            this.showToast('Contadores updated com sucesso!', 'success');
-            await this.openOfficerProfileModal(userId, this.state.lastProfileFiltered);
-          } else {
-            this.showToast(putRes.message || 'Erro ao atualizar contadores.', 'error');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Salvar Contadores';
-          }
-        } catch (err) {
-          this.showToast('Erro de rede.', 'error');
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = 'Salvar Contadores';
-        }
-      });
       
     } catch (err) {
       console.error(err);
@@ -4387,19 +4355,9 @@ class PfPanelApp {
                     </div>
                   </div>
 
-                  <div class="grid grid-cols-3 gap-1 bg-zinc-950/20 rounded-xl p-2.5 border border-[var(--border-subtle)]/30 mb-4 text-center">
-                    <div>
-                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold">Horas</p>
-                      <p class="text-xs font-bold text-zinc-200 mt-0.5">${o.totalHours}h</p>
-                    </div>
-                    <div>
-                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold">Ações</p>
-                      <p class="text-xs font-bold text-zinc-200 mt-0.5">${o.acoes}</p>
-                    </div>
-                    <div>
-                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold">Apreensões</p>
-                      <p class="text-xs font-bold text-zinc-200 mt-0.5">${o.apreensoes}</p>
-                    </div>
+                  <div class="bg-zinc-950/20 rounded-xl p-3 border border-[var(--border-subtle)]/30 mb-4 text-center">
+                    <p class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-bold">Total de Horas</p>
+                    <p class="text-lg font-black text-emerald-400 mt-0.5">${o.totalHours}h</p>
                   </div>
 
                   <button data-userid="${o.id}" class="view-officer-profile-btn w-full btn-soft py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 group-hover:bg-brand-500 group-hover:text-white transition-all">
@@ -4443,39 +4401,15 @@ class PfPanelApp {
 
               <!-- Tab Nav -->
               <div class="flex border-b border-[var(--border-subtle)] bg-[var(--card-bg-soft)]/20 px-6 overflow-x-auto no-scrollbar">
-                <button data-tab="general" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-brand-500 text-brand-500 active">Resumo</button>
-                <button data-tab="shifts" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-transparent text-[var(--text-muted)] hover:text-zinc-200">Plantões</button>
+                <button data-tab="shifts" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-brand-500 text-brand-500 active">Plantões</button>
                 <button data-tab="notes" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-transparent text-[var(--text-muted)] hover:text-zinc-200">Observações</button>
-                ${user.isAdmin ? `<button data-tab="admin" class="profile-tab-btn px-4 py-3 text-xs font-bold border-b-2 border-transparent text-rose-400 hover:text-rose-300">Administração</button>` : ''}
               </div>
 
               <!-- Tab Contents -->
               <div class="flex-1 overflow-y-auto p-6 space-y-6 max-h-[50vh] no-scrollbar">
                 
-                <!-- Geral Tab -->
-                <div id="tab-content-general" class="profile-tab-content space-y-4">
-                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
-                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Ações Policiais</p>
-                      <p class="text-2xl font-black text-brand-400 mt-0.5">${o.acoes}</p>
-                    </div>
-                    <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
-                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Apreensões</p>
-                      <p class="text-2xl font-black text-brand-400 mt-0.5">${o.apreensoes}</p>
-                    </div>
-                    <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
-                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Avaliações Feitas</p>
-                      <p class="text-2xl font-black text-brand-400 mt-0.5">${o.avaliacoesRealizadas}</p>
-                    </div>
-                    <div class="p-3 bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl text-center flex flex-col justify-center">
-                      <p class="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold mb-0.5">Avaliações Recebidas</p>
-                      <p class="text-2xl font-black text-brand-400 mt-0.5">${o.avaliacoesRecebidas}</p>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- Shifts Tab -->
-                <div id="tab-content-shifts" class="profile-tab-content hidden space-y-4">
+                <div id="tab-content-shifts" class="profile-tab-content space-y-4">
                   ${this.state.lastProfileFiltered && (this.state.pontoFilters.startDate || this.state.pontoFilters.endDate) ? `
                     <div class="p-3.5 bg-brand-500/10 border border-brand-500/20 rounded-xl flex items-center justify-between text-xs animate-fade-in">
                       <div class="flex items-center gap-2.5">
@@ -4550,38 +4484,6 @@ class PfPanelApp {
                     </form>
                   ` : ''}
                 </div>
-
-                <!-- Admin Tab (Command Settings) -->
-                ${user.isAdmin ? `
-                  <div id="tab-content-admin" class="profile-tab-content hidden space-y-4">
-                    <form id="edit-counters-form" class="space-y-4 card-premium p-4 rounded-xl border border-rose-500/20 bg-zinc-950/10">
-                      <h4 class="text-xs font-extrabold text-zinc-300 uppercase tracking-wider border-b border-[var(--border-subtle)] pb-2 mb-3">
-                        Ajuste de Contadores Operacionais
-                      </h4>
-                      <div class="grid grid-cols-2 gap-4">
-                        <div>
-                          <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Ações Policiais</label>
-                          <input type="number" id="cnt-acoes" value="${o.acoes}" min="0" class="w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                        </div>
-                        <div>
-                          <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Apreensões</label>
-                          <input type="number" id="cnt-apreensoes" value="${o.apreensoes}" min="0" class="w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                        </div>
-                        <div>
-                          <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Avaliações Realizadas</label>
-                          <input type="number" id="cnt-avaliacoesRealizadas" value="${o.avaliacoesRealizadas}" min="0" class="w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                        </div>
-                        <div>
-                          <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Avaliações Recebidas</label>
-                          <input type="number" id="cnt-avaliacoesRecebidas" value="${o.avaliacoesRecebidas}" min="0" class="w-full px-3 py-2 bg-zinc-950/40 rounded-xl text-xs border border-[var(--border-subtle)] focus:border-brand-500 text-zinc-100" />
-                        </div>
-                      </div>
-                      <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs py-2 rounded-xl active:scale-95 transition-all shadow-md mt-2">
-                        Salvar Contadores
-                      </button>
-                    </form>
-                  </div>
-                ` : ''}
 
               </div>
             </div>
