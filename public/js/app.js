@@ -134,25 +134,45 @@ class PfPanelApp {
     const livePages = new Set(['dashboard', 'cidadaos', 'solicitacoes', 'ponto', 'tickets', 'transcripts', 'logs', 'ausencias', 'warnings', 'officers', 'ranking', 'academia']);
     if (!livePages.has(page)) return;
 
+    // Track scroll events on contentContainer to pause refresh on activity
+    const contentContainer = this.root.querySelector('#page-content');
+    if (contentContainer && !contentContainer._scrollListenerAdded) {
+      contentContainer._scrollListenerAdded = true;
+      contentContainer._lastScrollTime = 0;
+      contentContainer.addEventListener('scroll', () => {
+        contentContainer._lastScrollTime = Date.now();
+      }, { passive: true });
+    }
+
     this.state.timers.liveRefresh = setInterval(async () => {
       if (document.hidden) return;
       if (this.state.currentPage !== page) return;
       if (this.modalRoot.innerHTML.trim()) return;
 
-      const contentContainer = this.root.querySelector('#page-content');
-      if (!contentContainer) return;
+      const currentContainer = this.root.querySelector('#page-content');
+      if (!currentContainer) return;
 
       const active = document.activeElement;
-      const isEditingFilter = active && contentContainer.contains(active) && ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName);
+      const isEditingFilter = active && currentContainer.contains(active) && ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName);
       if (isEditingFilter) return;
+
+      // Skip refresh if user scrolled in the last 6 seconds
+      const lastScroll = currentContainer._lastScrollTime || 0;
+      if (Date.now() - lastScroll < 6000) return;
 
       const renderer = this.pageRenderers?.[page];
       if (!renderer) return;
 
-      const scrollTop = contentContainer.scrollTop;
-      await renderer.call(this, contentContainer, true);
-      contentContainer.scrollTop = scrollTop;
-    }, 2500);
+      const scrollTop = currentContainer.scrollTop;
+      await renderer.call(this, currentContainer, true);
+      
+      // Use requestAnimationFrame to restore scroll position after layout renders
+      requestAnimationFrame(() => {
+        if (currentContainer) {
+          currentContainer.scrollTop = scrollTop;
+        }
+      });
+    }, 4000);
   }
 
   setupCommonListeners() {

@@ -244,7 +244,7 @@ router.post('/fivem/duty', async (req, res) => {
     // 2. Validar payload
     const { discord, action, job, name } = req.body;
 
-    if (!discord || !action || !job || !name) {
+    if (action !== 'punch_out_all' && (!discord || !action || !job || !name)) {
       return res.status(400).json({
         success: false,
         message: 'Campos obrigatórios ausentes. Certifique-se de enviar "discord", "action", "job" e "name".'
@@ -254,15 +254,17 @@ router.post('/fivem/duty', async (req, res) => {
     // 3. Mapear corporação
     let corporationSlug = 'pmesp';
     let battalionSlug = null;
-    const jobLower = String(job).toLowerCase();
+    if (action !== 'punch_out_all') {
+      const jobLower = String(job).toLowerCase();
 
-    if (['pmesp', 'ft', 'rota', 'baep', 'bprv'].includes(jobLower)) {
-      corporationSlug = 'pmesp';
-      if (jobLower !== 'pmesp') battalionSlug = jobLower;
-    } else if (jobLower === 'pcesp') {
-      corporationSlug = 'pcesp';
-    } else {
-      console.warn(`[FiveM API] Job desconhecido: "${job}". Usando fallback pmesp.`);
+      if (['pmesp', 'ft', 'rota', 'baep', 'bprv'].includes(jobLower)) {
+        corporationSlug = 'pmesp';
+        if (jobLower !== 'pmesp') battalionSlug = jobLower;
+      } else if (jobLower === 'pcesp') {
+        corporationSlug = 'pcesp';
+      } else {
+        console.warn(`[FiveM API] Job desconhecido: "${job}". Usando fallback pmesp.`);
+      }
     }
 
     // 4. Processar ação
@@ -340,8 +342,46 @@ router.post('/fivem/duty', async (req, res) => {
 
       return res.json({ success: true, code: 'success', message: `Ponto encerrado via jogo! Ativo por ${timeStr}.`, durationMs });
 
+    } else if (action === 'punch_out_all') {
+      const ativos = await Ponto.find({ status: 'aberto' });
+      const now = new Date();
+
+      for (const ativo of ativos) {
+        const durationMs = now.getTime() - new Date(ativo.entrada).getTime();
+        ativo.saida = now;
+        ativo.status = 'fechado';
+        ativo.durationMs = durationMs;
+        await ativo.save();
+
+        // Log no Discord (async)
+        setImmediate(async () => {
+          try {
+            const logChannel = LOG_CHANNELS[ativo.corporationSlug || 'pmesp'] || LOG_CHANNELS.pmesp;
+            if (logChannel) {
+              await sendDiscordMessage(logChannel, buildLogEmbed({
+                type: 'saida', 
+                userId: ativo.userId, 
+                username: ativo.username, 
+                ponto: ativo, 
+                durationMs
+              }));
+            }
+          } catch (err) {
+            console.error('[FiveM API] Erro ao enviar notificação de saída em massa:', err.message);
+          }
+        });
+      }
+
+      await updatePanelStatus();
+
+      return res.json({ 
+        success: true, 
+        code: 'success', 
+        message: `Todos os ${ativos.length} pontos abertos foram encerrados via reinício do jogo.` 
+      });
+
     } else {
-      return res.status(400).json({ success: false, message: 'Ação inválida. Use "punch_in" ou "punch_out".' });
+      return res.status(400).json({ success: false, message: 'Ação inválida. Use "punch_in", "punch_out" ou "punch_out_all".' });
     }
 
   } catch (error) {
