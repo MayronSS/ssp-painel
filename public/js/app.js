@@ -113,6 +113,9 @@ class PfPanelApp {
       contentContainer._scrollListenerAdded = true;
       contentContainer._lastScrollTime = 0;
       contentContainer.addEventListener('scroll', () => {
+        if (contentContainer._ignoreScrollUntil && Date.now() < contentContainer._ignoreScrollUntil) {
+          return;
+        }
         contentContainer._lastScrollTime = Date.now();
       }, { passive: true });
     }
@@ -139,14 +142,24 @@ class PfPanelApp {
       if (!renderer) return;
 
       const scrollTop = currentContainer.scrollTop;
+      currentContainer._ignoreScrollUntil = Date.now() + 500; // Ignore scroll events for 500ms during refresh
+      
       await renderer.call(this, currentContainer, true);
       
-      // Use requestAnimationFrame to restore scroll position after layout renders
+      // Multi-step scroll position restoration to avoid clamping during layout recalculation
+      currentContainer.scrollTop = scrollTop;
       requestAnimationFrame(() => {
-        if (currentContainer) {
-          currentContainer.scrollTop = scrollTop;
-        }
+        if (currentContainer) currentContainer.scrollTop = scrollTop;
       });
+      setTimeout(() => {
+        if (currentContainer) currentContainer.scrollTop = scrollTop;
+      }, 50);
+      setTimeout(() => {
+        if (currentContainer) currentContainer.scrollTop = scrollTop;
+      }, 150);
+      setTimeout(() => {
+        if (currentContainer) currentContainer.scrollTop = scrollTop;
+      }, 300);
     }, 4000);
   }
 
